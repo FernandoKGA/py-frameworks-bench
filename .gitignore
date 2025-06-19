@@ -5,3 +5,4 @@
 /.vimrc
 /docs/*.lock
 /docs/_site
+*__pycache__*

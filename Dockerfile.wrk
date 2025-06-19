@@ -1,0 +1,31 @@
+FROM debian:12-slim AS build
+
+ENV VERSION=4.2.0
+ENV TARBALL=https://github.com/wg/wrk/archive/$VERSION.tar.gz
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update  && \
+    echo "==> Install curl & helper tools..."  && \
+    apt-get install -y --force-yes -q --no-install-recommends curl make gcc build-essential libssl-dev unzip
+
+RUN echo "==> Download & compile..."  && \
+    cd /tmp  && \
+    curl -L --insecure $TARBALL -o wrk-src.tar.gz && \
+    tar xvzf wrk-src.tar.gz
+
+RUN cd /tmp/wrk-$VERSION  && \
+    make       && \
+    cp wrk /
+
+#-----------------------------
+
+FROM debian:12-slim AS wrk
+
+COPY --from=build /wrk /usr/local/bin/wrk
+
+# configure
+VOLUME [ "/data" ]
+WORKDIR /data
+
+ENTRYPOINT [ "wrk" ]
