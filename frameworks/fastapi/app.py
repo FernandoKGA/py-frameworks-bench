@@ -2,7 +2,14 @@ import time
 from uuid import uuid4
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
+from codecarbon import OfflineEmissionsTracker
 
+tracker = OfflineEmissionsTracker(
+    output_dir="/results",  # ou outro caminho acessível
+    country_iso_code="BRA",  # opcional: Brasil
+    log_level="info"
+)
+tracker.start()
 
 app = FastAPI()
 
@@ -20,6 +27,14 @@ async def req_ok_dyn(part):
 for n in range(5):
     app.get(f"/route-{n}")(req_ok)
     app.get(f"/route-dyn-{n}/{{part}}")(req_ok_dyn)
+
+@app.get('/save')
+async def save():
+    tracker.stop()
+    content = "<b>SAVED OK</b>"
+    headers = {'x-time': f"{time.time()}"}
+    return HTMLResponse(content, headers=headers)
+
 
 
 # then prepare endpoints for the benchmark

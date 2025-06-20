@@ -1,3 +1,3 @@
-from horneds/py-async-benchmark
-
+from base
+RUN mkdir -p /results
 ENTRYPOINT ["/app/start.sh"]
