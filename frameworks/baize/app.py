@@ -4,6 +4,24 @@ from uuid import uuid4
 from baize.asgi import (HTMLResponse, JSONResponse, PlainTextResponse, Request, Response, Router,
                         request_response)
 from baize.exceptions import HTTPException
+from codecarbon import OfflineEmissionsTracker
+from importlib.metadata import version, PackageNotFoundError
+
+def save_versions_txt(lib, filepath="/results/version.txt"):
+    with open(filepath, "w") as f:
+        try:
+            f.write(f"{lib}=={version(lib)}\n")
+        except PackageNotFoundError:
+            f.write(f"{lib}==NOT INSTALLED\n")
+
+save_versions_txt("baize")
+
+tracker = OfflineEmissionsTracker(
+    output_dir="/results",  # ou outro caminho acessível
+    country_iso_code="BRA",  # opcional: Brasil
+    log_level="info"
+)
+tracker.start()
 
 routes = []
 
@@ -20,6 +38,14 @@ for n in range(5):
 async def html(request: Request) -> Response:
     """Return HTML content and a custom header."""
     content = "<b>HTML OK</b>"
+    headers = {"x-time": f"{time.time()}"}
+    return HTMLResponse(content, headers=headers)
+
+@request_response
+async def save(request: Request) -> Response:
+    """Return HTML content and a custom header."""
+    tracker.stop()
+    content = "<b>Saved OK</b>"
     headers = {"x-time": f"{time.time()}"}
     return HTMLResponse(content, headers=headers)
 
@@ -64,6 +90,7 @@ async def api(request: Request) -> Response:
 
 app = Router(
     ("/html", html),
+    ("/save", save),
     ("/upload", upload),
     ("/api/users/{user:int}/records/{record:int}", api),
     *routes,

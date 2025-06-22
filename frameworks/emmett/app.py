@@ -4,6 +4,24 @@ from uuid import uuid4
 
 from emmett import App, request, response
 from emmett.tools import service
+from codecarbon import OfflineEmissionsTracker
+from importlib.metadata import version, PackageNotFoundError
+
+def save_versions_txt(lib, filepath="/results/version.txt"):
+    with open(filepath, "w") as f:
+        try:
+            f.write(f"{lib}=={version(lib)}\n")
+        except PackageNotFoundError:
+            f.write(f"{lib}==NOT INSTALLED\n")
+
+save_versions_txt("emmett")
+
+tracker = OfflineEmissionsTracker(
+    output_dir="/results",  # ou outro caminho acessível
+    country_iso_code="BRA",  # opcional: Brasil
+    log_level="info"
+)
+tracker.start()
 
 app = App(__name__)
 app.config.handle_static = False
@@ -28,6 +46,14 @@ async def html():
     response.headers["x-time"] = f"{time.time()}"
     response.content_type = "text/html"
     return "<b>HTML OK</b>"
+
+@app.route(methods=["get"], output="str")
+async def save():
+    """Return HTML content and a custom header."""
+    tracker.stop()
+    response.headers["x-time"] = f"{time.time()}"
+    response.content_type = "text/html"
+    return "<b>SAVED OK</b>"
 
 
 @app.route(methods=["post"], output="str")

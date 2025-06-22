@@ -3,6 +3,16 @@ from uuid import uuid4
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
 from codecarbon import OfflineEmissionsTracker
+from importlib.metadata import version, PackageNotFoundError
+
+def save_versions_txt(lib, filepath="/results/version.txt"):
+    with open(filepath, "w") as f:
+        try:
+            f.write(f"{lib}=={version(lib)}\n")
+        except PackageNotFoundError:
+            f.write(f"{lib}==NOT INSTALLED\n")
+
+save_versions_txt("fastapi")
 
 tracker = OfflineEmissionsTracker(
     output_dir="/results",  # ou outro caminho acessível

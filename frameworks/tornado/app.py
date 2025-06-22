@@ -7,7 +7,31 @@ from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.log import access_log
 from tornado.web import Application, url, RequestHandler
+from codecarbon import OfflineEmissionsTracker
+from importlib.metadata import version, PackageNotFoundError
 
+def save_versions_txt(lib, filepath="/results/version.txt"):
+    with open(filepath, "w") as f:
+        try:
+            f.write(f"{lib}=={version(lib)}\n")
+        except PackageNotFoundError:
+            f.write(f"{lib}==NOT INSTALLED\n")
+
+save_versions_txt("tornado")
+
+tracker = OfflineEmissionsTracker(
+    output_dir="/results",  # ou outro caminho acessível
+    country_iso_code="BRA",  # opcional: Brasil
+    log_level="info"
+)
+tracker.start()
+
+class SAVE(RequestHandler):
+
+    async def get(self, part=None):
+        tracker.stop()
+        self.write("<b>SAVE OK</b>")
+        self.add_header('x-time', f"{time.time()}")
 
 class HTML(RequestHandler):
 
@@ -51,6 +75,7 @@ urls += [url(f"/route-dyn-{n}/(.*)", HTML) for n in range(5)]
 
 app = Application(urls + [
     url('/html', HTML),
+    url('/save', SAVE),
     url('/upload', Upload),
     url('/api/users/([^/]+)/records/(.+)', API),
 ])

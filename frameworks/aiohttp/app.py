@@ -4,6 +4,18 @@ from uuid import uuid4
 from aiohttp.web import (
     RouteTableDef, Application, Response, json_response, HTTPBadRequest, HTTPUnauthorized)
 
+from importlib.metadata import version, PackageNotFoundError
+from codecarbon import OfflineEmissionsTracker
+
+def save_versions_txt(lib, filepath="/results/version.txt"):
+    with open(filepath, "w") as f:
+        try:
+            f.write(f"{lib}=={version(lib)}\n")
+        except PackageNotFoundError:
+            f.write(f"{lib}==NOT INSTALLED\n")
+
+save_versions_txt("aiohttp")
+
 
 routes = RouteTableDef()
 
@@ -24,6 +36,14 @@ for n in range(5):
 async def html(request):
     """Return HTML content and a custom header."""
     content = "<b>HTML OK</b>"
+    headers = {'x-time': f"{time.time()}"}
+    return Response(text=content, content_type="text/html", headers=headers)
+
+@routes.get('/save')
+async def save(request):
+    """Return HTML content and a custom header."""
+    tracker.stop()
+    content = "<b>SAVED OK</b>"
     headers = {'x-time': f"{time.time()}"}
     return Response(text=content, content_type="text/html", headers=headers)
 
@@ -60,6 +80,11 @@ async def api(request):
         'data': await request.json(),
     })
 
-
+tracker = OfflineEmissionsTracker(
+    output_dir="/results",  # ou outro caminho acessível
+    country_iso_code="BRA",  # opcional: Brasil
+    log_level="info"
+)
+tracker.start()
 app = Application()
 app.add_routes(routes)

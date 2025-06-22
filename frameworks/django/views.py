@@ -4,11 +4,27 @@ from uuid import uuid4
 from django.urls import path
 from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseBadRequest
 import json
+from codecarbon import OfflineEmissionsTracker
+
+tracker = OfflineEmissionsTracker(
+    output_dir="/results",  # ou outro caminho acessível
+    country_iso_code="BRA",  # opcional: Brasil
+    log_level="info"
+)
+tracker.start()
+
 
 
 async def html(request):
     """Return HTML content and a custom header."""
     content = "<b>HTML OK</b>"
+    headers = {'x-time': f"{time.time()}"}
+    return HttpResponse(content, headers=headers)
+
+async def save(request):
+    """Return HTML content and a custom header."""
+    tracker.stop()
+    content = "<b>SAVED OK</b>"
     headers = {'x-time': f"{time.time()}"}
     return HttpResponse(content, headers=headers)
 
@@ -47,6 +63,7 @@ async def api(request, user, record):
 
 urlpatterns = [
     path('html',  html),
+    path('save',  save),
     path('upload',  upload),
     path('api/users/<int:user>/records/<int:record>',  api),
 ]

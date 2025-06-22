@@ -3,30 +3,14 @@ import subprocess
 from pathlib import Path
 import shutil
 import re
+from util.python_lib_info import get_versions
+import json
 
 # Dicionário: framework -> lista de versões desejadas
-FRAMEWORKS = {
-    "aiohttp": ["3.8.1"],
-    "blacksheep": ["1.2.6"],
-    "baize": ["0.15.0"],
-    "muffin": ["0.86.4"],
-    "quart": ["0.18.3"],
-    "sanic": ["22.9.0"],
-    "starlette": ["0.27.0"],
-    "django": ["4.2.0"],
-    "falcon": ["3.1.1"],
-    "fastapi": ["0.110.0", "0.111.0"],
-    "emmett": ["2.5.0"],
-    "tornado": ["6.3.3"],
-}
 
-FRAMEWORKS = {
-    "fastapi": ["0.110.0", "0.111.0"],
-}
-
-FRAMEWORKS = {
-    "fastapi": ["0.110.0"],
-}
+BANNED =["blacksheep", "quart", "sanic", "emmett"]
+FRAMEWORKS_NAMES = ['aiohttp', 'baize', 'muffin', 'starlette', 'django', 'falcon', 'tornado', 'fastapi']
+FRAMEWORKS = {}
 
 NETWORK = "data"
 ROOT_DIR = Path(__file__).parent.resolve()
@@ -51,28 +35,17 @@ def ensure_docker_network(network_name):
         run(f"docker network create {network_name}")
 
 def prepare_versioned_framework(base_name, version):
-    version_tag = version.replace(".", "_")
-    new_name = f"{base_name}-{version_tag}"
-    src_dir = BASE_FRAMEWORKS_DIR / base_name
-    dst_dir = BASE_FRAMEWORKS_DIR / new_name
-    print(f"📁 Criando cópia: {src_dir} → {dst_dir}")
-    shutil.copytree(src_dir, dst_dir, dirs_exist_ok=True)
-
-    # Atualizar requirements.txt
-    req_file = dst_dir / "requirements.txt"
-    if req_file.exists():
-        lines = req_file.read_text().splitlines()
-        base_pattern = re.compile(rf"^\s*{re.escape(base_name)}\s*==")
-        new_lines = [line for line in lines if not base_pattern.match(line)]
-        new_lines.append(f"{base_name}=={version}")
-        req_file.write_text("\n".join(new_lines) + "\n")
-    else:
-        req_file.write_text(f"{base_name}=={version}\n")
-
-    return new_name
+    path_dir = BASE_FRAMEWORKS_DIR / base_name
+    req_file = path_dir / "requirements.txt"
+    lines = req_file.read_text().splitlines()
+    base_pattern = re.compile(rf"^\s*{re.escape(base_name)}\s*==")
+    new_lines = [line for line in lines if not base_pattern.match(line)]
+    new_lines.append(f"{base_name}=={version}")
+    req_file.write_text("\n".join(new_lines) + "\n")
 
 def run_benchmark(framework_name, version):
-    versioned_name = prepare_versioned_framework(framework_name, version)
+    prepare_versioned_framework(framework_name, version)
+    versioned_name = f"{framework_name}_{version.replace('.', '_')}"
     print("=" * 60)
     print(f"🚀 Benchmark: {framework_name} v{version}")
     print("=" * 60)
@@ -84,16 +57,29 @@ def run_benchmark(framework_name, version):
             shutil.rmtree(result_dir)
         RESULTS_DIR.rename(result_dir)
         print(f"✅ Resultados salvos em: {result_dir}\n")
+        return True
     except subprocess.CalledProcessError as e:
         print(f"❌ Erro ao rodar benchmark para {versioned_name}: {e}")
-    finally:
-        shutil.rmtree(BASE_FRAMEWORKS_DIR / versioned_name, ignore_errors=True)
+        return False
 
 def main():
+    good_versions = {}
+    for framework in FRAMEWORKS_NAMES:
+        good_versions[framework] = []
+        versions_list = sorted(get_versions(framework), reverse=True)
+        versions_list = [v for v in versions_list if "b" not in v and "a" not in v]  # Ignora versões beta e alpha
+        if versions_list:
+            FRAMEWORKS[framework] = versions_list
+        else:
+            print(f"⚠️ Aviso: Nenhuma versão encontrada para o framework '{framework}'.")
     ensure_docker_network(NETWORK)
     for framework, versions in FRAMEWORKS.items():
         for version in versions:
-            run_benchmark(framework, version)
+            if run_benchmark(framework, version):
+                good_versions[framework].append(version)
+    
+    with open("good_versions.json", "w") as f:
+        json.dump(good_versions, f, indent=4)
 
 if __name__ == "__main__":
     main()

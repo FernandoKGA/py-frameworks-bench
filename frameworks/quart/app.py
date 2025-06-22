@@ -2,7 +2,24 @@ import time
 from uuid import uuid4
 
 from quart import Quart, Response, request
+from codecarbon import OfflineEmissionsTracker
+from importlib.metadata import version, PackageNotFoundError
 
+def save_versions_txt(lib, filepath="/results/version.txt"):
+    with open(filepath, "w") as f:
+        try:
+            f.write(f"{lib}=={version(lib)}\n")
+        except PackageNotFoundError:
+            f.write(f"{lib}==NOT INSTALLED\n")
+
+save_versions_txt("quart")
+
+tracker = OfflineEmissionsTracker(
+    output_dir="/results",  # ou outro caminho acessível
+    country_iso_code="BRA",  # opcional: Brasil
+    log_level="info"
+)
+tracker.start()
 
 app = Quart(__name__)
 
@@ -24,6 +41,14 @@ for n in range(5):
 async def hello():
     """Return HTML content and a custom header."""
     content = "<b>HTML OK</b>"
+    headers = {'x-time': f"{time.time()}"}
+    return Response(content, content_type="text/html", headers=headers)
+
+@app.route('/save')
+async def save():
+    """Return HTML content and a custom header."""
+    tracker.stop()
+    content = "<b>SAVED OK</b>"
     headers = {'x-time': f"{time.time()}"}
     return Response(content, content_type="text/html", headers=headers)
 

@@ -3,7 +3,24 @@ from uuid import uuid4
 
 from blacksheep import Application
 from blacksheep.server.responses import html, json, bad_request, text, unauthorized
+from codecarbon import OfflineEmissionsTracker
+from importlib.metadata import version, PackageNotFoundError
 
+def save_versions_txt(lib, filepath="/results/version.txt"):
+    with open(filepath, "w") as f:
+        try:
+            f.write(f"{lib}=={version(lib)}\n")
+        except PackageNotFoundError:
+            f.write(f"{lib}==NOT INSTALLED\n")
+
+save_versions_txt("blacksheep")
+
+tracker = OfflineEmissionsTracker(
+    output_dir="/results",  # ou outro caminho acessível
+    country_iso_code="BRA",  # opcional: Brasil
+    log_level="info"
+)
+tracker.start()
 
 app = Application()
 
@@ -15,8 +32,8 @@ def req_ok(request):
 
 
 for n in range(5):
-    app.route(f"/route-{n}")(req_ok)
-    app.route(f"/route-dyn-{n}/<part>")(req_ok)
+    app.router(f"/route-{n}")(req_ok)
+    app.router(f"/route-dyn-{n}/<part>")(req_ok)
 
 
 # then prepare endpoints for the benchmark
@@ -25,6 +42,14 @@ for n in range(5):
 async def view_html(request):
     """Return HTML content and a custom header."""
     response = html("<b>HTML OK</b>")
+    response.add_header(b'x-time', f"{time.time()}".encode())
+    return response
+
+@app.route('/save')
+async def view_save(request):
+    """Return HTML content and a custom header."""
+    tracker.stop()
+    response = html("<b>Saved OK</b>")
     response.add_header(b'x-time', f"{time.time()}".encode())
     return response
 

@@ -2,6 +2,8 @@ FROM vinixnan/python:3.12 AS base
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
+RUN apt update && apt install -y python3-dev build-essential
+
 RUN /usr/local/bin/pip install --no-cache-dir \
     wheel \
     gunicorn \
@@ -9,7 +11,7 @@ RUN /usr/local/bin/pip install --no-cache-dir \
     ujson \
     uvicorn[standard]
 
-RUN pip install codecarbon pyinstrument
+RUN pip install codecarbon pyinstrument setuptools wheel jinja2
 
 ONBUILD COPY requirements.txt /app/requirements.txt
 ONBUILD RUN /usr/local/bin/pip install --no-cache-dir -r requirements.txt

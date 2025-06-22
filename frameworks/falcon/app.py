@@ -3,7 +3,33 @@ from uuid import uuid4
 
 from falcon.asgi import App
 from json import dumps
+from codecarbon import OfflineEmissionsTracker
+from importlib.metadata import version, PackageNotFoundError
 
+def save_versions_txt(lib, filepath="/results/version.txt"):
+    with open(filepath, "w") as f:
+        try:
+            f.write(f"{lib}=={version(lib)}\n")
+        except PackageNotFoundError:
+            f.write(f"{lib}==NOT INSTALLED\n")
+
+save_versions_txt("falcon")
+
+tracker = OfflineEmissionsTracker(
+    output_dir="/results",  # ou outro caminho acessível
+    country_iso_code="BRA",  # opcional: Brasil
+    log_level="info"
+)
+tracker.start()
+
+class save:
+    """Return HTML content and a custom header."""
+
+    async def on_get(self, request, response):
+        tracker.stop()
+        response.text = "<b>SAVED OK</b>"
+        response.set_header('x-time', f"{time.time()}")
+        response.content_type = 'text/html'
 
 class html:
     """Return HTML content and a custom header."""
@@ -65,5 +91,6 @@ for n in range(5):
 # then prepare endpoints for the benchmark
 # ----------------------------------------
 app.add_route('/html', html())
+app.add_route('/save', save())
 app.add_route('/upload', upload())
 app.add_route('/api/users/{user:int}/records/{record:int}', api())

@@ -3,6 +3,24 @@ from pathlib import Path
 from uuid import uuid4
 
 from muffin import Application, ResponseHTML, ResponseText, ResponseError
+from codecarbon import OfflineEmissionsTracker
+from importlib.metadata import version, PackageNotFoundError
+
+def save_versions_txt(lib, filepath="/results/version.txt"):
+    with open(filepath, "w") as f:
+        try:
+            f.write(f"{lib}=={version(lib)}\n")
+        except PackageNotFoundError:
+            f.write(f"{lib}==NOT INSTALLED\n")
+
+save_versions_txt("muffin")
+
+tracker = OfflineEmissionsTracker(
+    output_dir="/results",  # ou outro caminho acessível
+    country_iso_code="BRA",  # opcional: Brasil
+    log_level="info"
+)
+tracker.start()
 
 
 upload_dir = Path(__file__).parent.parent
@@ -25,6 +43,14 @@ for n in range(5):
 async def html(request):
     """Return HTML content and a custom header."""
     content = "<b>HTML OK</b>"
+    headers = {'x-time': f"{time.time()}"}
+    return ResponseHTML(content, headers=headers)
+
+@app.route('/save')
+async def html(request):
+    """Return HTML content and a custom header."""
+    tracker.stop()
+    content = "<b>SAVED OK</b>"
     headers = {'x-time': f"{time.time()}"}
     return ResponseHTML(content, headers=headers)
 
