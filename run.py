@@ -9,7 +9,8 @@ import json
 # Dicionário: framework -> lista de versões desejadas
 
 BANNED =["blacksheep", "quart", "sanic", "emmett"]
-FRAMEWORKS_NAMES = ['aiohttp', 'baize', 'muffin', 'starlette', 'django', 'falcon', 'tornado', 'fastapi']
+# FRAMEWORKS_NAMES = ['aiohttp', 'baize', 'muffin', 'starlette', 'django', 'falcon', 'tornado', 'fastapi']
+FRAMEWORKS_NAMES = ['fastapi']
 FRAMEWORKS = {}
 
 NETWORK = "data"

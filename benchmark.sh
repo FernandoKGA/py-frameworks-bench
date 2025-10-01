@@ -57,13 +57,14 @@ run_benchmark() {
   local label="$2"
   echo "=== Benchmark: $label ($endpoint) ===" >> $RESULTS_FILE_LOG
   cmd="docker run --rm \
+  --network host \
   -v $SCRIPTS_DIR:/scripts \
   -v $RESULTS_DIR_LOGS:/results \
   -e FRAMEWORK=${FRAMEWORK} -e FILENAME=/results/${label}.csv
   wrk \
   -t4 -c64 -d30s \
   -s /scripts/${label}.lua
-  http://host.docker.internal:8080/$endpoint >> $RESULTS_FILE_LOG"
+  http://localhost:8080/$endpoint >> $RESULTS_FILE_LOG"
 
   echo $cmd
   eval $cmd
@@ -96,7 +97,7 @@ run_benchmark_hey() {
       return 1
   fi
   local outfile="$RESULTS_DIR_LOGS/${label}_${tipo}.csv"
-  hey_base+=("http://host.docker.internal:8080/$endpoint")
+  hey_base+=("http://localhost:8080/$endpoint")
 
   hey_cmd="${hey_base[*]}"
   echo $hey_cmd
@@ -110,18 +111,19 @@ finish_benchmark() {
   local endpoint="save"
   local label="save"
   docker run --rm \
+  --network host \
   -v $SCRIPTS_DIR:/scripts \
   -v $RESULTS_DIR_LOGS:/results \
   wrk \
   -t1 -c1 -d15s \
-  http://host.docker.internal:8080/$endpoint
+  http://localhost:8080/$endpoint
   sleep 3
-  docker stop --timeout 5 $APP_NAME
+  docker stop -t 5 $APP_NAME
 }
 
-#run_benchmark "html" "html"
+run_benchmark "html" "html"
 run_benchmark "upload" "upload"
-#run_benchmark "api/users/1/records/1?query=test" "api"
+run_benchmark "api/users/1/records/1?query=test" "api"
 
 #run_benchmark_hey "html" "html" 500000
 #run_benchmark_hey "upload" "upload" 500000

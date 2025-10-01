@@ -1,0 +1,4074 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Table of contents</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <hr>
+<h2 id="layout-posttitle-results-2025-09-23description-python-frameworks-benchmark-results-2025-09-23date---2025-09-23categories-results">layout: post
+title: Results (2025-09-23)
+description: Python Frameworks Benchmark Results (2025-09-23)
+date:   (2025-09-23)
+categories: results</h2>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.2.1/dist/chart.min.js"></script>
+<blockquote>
+<p>This is a simple benchmark for python async frameworks. Almost all of the
+frameworks are ASGI-compatible (aiohttp and tornado are exceptions on the
+moment).</p>
+<p>The objective of the benchmark is not testing deployment (like uvicorn vs
+hypercorn and etc) or database (ORM, drivers) but instead test the frameworks
+itself. The benchmark checks request parsing (body, headers, formdata,
+queries), routing, responses.</p>
+</blockquote>
+<p>Read more about the benchmark: <a href="/py-frameworks-bench/about/">The Methodic</a></p>
+<h1 id="table-of-contents">Table of contents</h1>
+<ul>
+<li><a href="#html">Accept a request and return HTML response with a custom dynamic header</a></li>
+<li><a href="#api">Parse path params, query string, JSON body and return a json response</a></li>
+<li><a href="#upload">Parse uploaded file, store it on disk and return a text response</a></li>
+<li><a href="#composite">Composite stats </a></li>
+</ul>
+<p><canvas id="chart" style="margin-bottom: 2em"></canvas></p>
+<script>
+    var ctx = document.getElementById('chart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['fastapi_0_99_1','fastapi_0_99_0','fastapi_0_98_0','fastapi_0_97_0','fastapi_0_96_1','fastapi_0_96_0','fastapi_0_95_2','fastapi_0_95_1','fastapi_0_95_0','fastapi_0_94_1','fastapi_0_94_0','fastapi_0_93_0','fastapi_0_92_0','fastapi_0_91_0','fastapi_0_90_1','fastapi_0_90_0','fastapi_0_89_1','fastapi_0_89_0','fastapi_0_88_0','fastapi_0_87_0','fastapi_0_86_0','fastapi_0_85_2','fastapi_0_85_1','fastapi_0_85_0','fastapi_0_84_0','fastapi_0_83_0','fastapi_0_82_0','fastapi_0_81_0','fastapi_0_80_0','fastapi_0_79_1','fastapi_0_79_0','fastapi_0_78_0','fastapi_0_77_1','fastapi_0_77_0','fastapi_0_76_0','fastapi_0_75_2','fastapi_0_75_1','fastapi_0_75_0','fastapi_0_74_1','fastapi_0_74_0','fastapi_0_73_0','fastapi_0_72_0','fastapi_0_71_0','fastapi_0_70_1','fastapi_0_70_0','fastapi_0_69_0','fastapi_0_68_2','fastapi_0_68_1','fastapi_0_68_0','fastapi_0_67_0','fastapi_0_66_1','fastapi_0_66_0','fastapi_0_65_3','fastapi_0_65_2','fastapi_0_65_1','fastapi_0_65_0','fastapi_0_64_0','fastapi_0_63_0','fastapi_0_62_0','fastapi_0_61_2','fastapi_0_61_1','fastapi_0_61_0','fastapi_0_60_2','fastapi_0_60_1','fastapi_0_60_0','fastapi_0_59_0','fastapi_0_58_1','fastapi_0_58_0','fastapi_0_57_0','fastapi_0_56_1','fastapi_0_56_0','fastapi_0_55_1','fastapi_0_55_0','fastapi_0_54_2','fastapi_0_54_1','fastapi_0_54_0','fastapi_0_53_2','fastapi_0_53_1','fastapi_0_53_0','fastapi_0_52_0','fastapi_0_51_0','fastapi_0_117_1','fastapi_0_117_0','fastapi_0_116_2','fastapi_0_116_1','fastapi_0_116_0','fastapi_0_115_9','fastapi_0_115_8','fastapi_0_115_7','fastapi_0_115_6','fastapi_0_115_5','fastapi_0_115_4','fastapi_0_115_3','fastapi_0_115_2','fastapi_0_115_14','fastapi_0_115_13','fastapi_0_115_12','fastapi_0_115_11','fastapi_0_115_10','fastapi_0_115_1','fastapi_0_115_0','fastapi_0_114_2','fastapi_0_114_1','fastapi_0_114_0','fastapi_0_113_0','fastapi_0_112_4','fastapi_0_112_3','fastapi_0_112_2','fastapi_0_112_1','fastapi_0_112_0','fastapi_0_111_1','fastapi_0_111_0_dev1','fastapi_0_111_0','fastapi_0_110_3_dev2','fastapi_0_110_3_dev1','fastapi_0_110_3','fastapi_0_110_2','fastapi_0_110_1','fastapi_0_110_0','fastapi_0_109_2','fastapi_0_109_1','fastapi_0_109_0','fastapi_0_108_0','fastapi_0_107_0','fastapi_0_106_0','fastapi_0_105_0','fastapi_0_104_1','fastapi_0_104_0','fastapi_0_103_2','fastapi_0_103_1','fastapi_0_103_0','fastapi_0_102_0','fastapi_0_101_1','fastapi_0_101_0','fastapi_0_100_1','fastapi_0_100_0',],
+            datasets: [
+                {
+                    label: 'Single HTML response (req/s)',
+                    data: ['33353','34650','34047','34700','34479','33859','34524','34278','34358','34017','34235','33901','34549','34582','34284','34549','34029','35248','34399','34471','33935','34470','34150','35014','34380','34460','34380','34638','34388','34519','34508','34352','35307','35553','34681','37173','36826','36630','35939','38563','37615','37808','37618','38526','37454','38417','38362','38682','37716','38126','37800','38296','38169','38177','37615','38620','37367','38276','38307','38124','37128','37718','37422','37074','37953','37999','37868','37743','37499','37647','37566','37999','37905','37575','37747','37583','36960','36801','37834','37687','37714','31215','31488','30958','31375','31319','30831','31534','31740','31471','31118','31639','30812','30905','31705','31461','31548','31326','30741','25941','26217','26224','26483','26262','25846','26263','25891','25960','26498','25066','26015','26128','26145','26141','26597','25342','26294','26175','26358','26324','26980','25573','30959','32332','34229','33997','34496','34789','34039','34223','34573','34417','34013','34199','33377','34416',],
+                    backgroundColor: [
+                        '#b9ddf1', '#afd6ed', '#a5cfe9', '#9bc7e4', '#92c0df', '#89b8da', '#80b0d5', '#79aacf', '#72a3c9', '#6a9bc3', '#6394be', '#5b8cb8', '#5485b2', '#4e7fac', '#4878a6', '#437a9f', '#3d6a98', '#376491', '#305d8a', '#2a5783',
+                    ].reverse()
+                },
+                {
+                    label: 'Work with JSON (req/s)',
+                    data: ['22955','22774','22601','22817','22720','22470','22830','22588','23009','22705','22575','22525','22891','22980','22882','22650','22836','22970','22711','22594','22625','22221','22519','22756','22974','22975','22708','22914','23039','22500','22690','22840','23127','23268','22713','24241','23699','23790','23480','24712','24502','24270','24295','24761','24015','24576','24421','24528','24408','24463','24480','24242','24643','24647','24582','24774','24355','24951','24829','24255','24309','24137','24367','23709','24136','24255','24283','23971','24076','24284','24293','24096','24052','24081','24356','24055','24193','23774','24640','24092','24111','17876','18049','17711','17708','17987','17597','18064','17594','17748','17893','17991','17772','17895','18091','17966','17765','17743','17793','15730','15804','17034','17239','17027','17049','17091','18054','18209','17854','18028','18038','18034','18121','18195','18203','18246','18055','18066','18155','18308','17994','18129','20509','20783','21445','21600','21549','21715','21495','21467','21587','21613','21306','21572','21347','21643',],
+                    backgroundColor: [
+                        '#b3e0a6', '#a5db96', '#98d687', '#8ed07f', '#85ca77', '#7dc370', '#75bc69', '#6eb663', '#67af5c', '#61a956', '#59a253', '#519c51', '#49964f', '#428f4d', '#398949', '#308344', '#2b7c40', '#27763d', '#256f3d', '#24693d',
+                    ].reverse()
+                },
+                {
+                    label: 'Upload file (req/s)',
+                    data: ['7797','7783','7655','7814','7724','7733','7770','7618','7732','7616','7624','7666','7658','7457','7193','7230','7110','7237','7162','7208','7643','7622','7660','7570','7762','7768','7674','7661','7618','7609','7645','7648','7728','7723','7614','7799','7702','7811','7647','7905','7885','7834','7787','7812','7681','7820','7766','7847','7729','7776','7771','7685','7738','7827','7746','7733','7680','7682','7753','7673','7646','7591','7642','7598','5702','5637','5729','5659','5649','5680','5624','5726','5644','5686','5714','5688','5574','5621','5697','5631','5613','7217','7123','7197','7127','7184','7142','7217','7176','7187','7090','7166','7137','7101','7120','7199','7152','7084','7089','6742','6739','6763','6806','6745','6726','6727','6770','6748','6749','6744','6754','6667','6685','6641','6742','6693','6735','6686','6745','6757','6661','6761','7006','6969','7061','7189','7190','7110','7115','7139','7142','7078','7122','7073','7087','7103',],
+                    backgroundColor: [
+                        '#ffc685', '#fcbe75', '#f9b665', '#f7ae54', '#f5a645', '#f59c3c', '#f49234', '#f2882d', '#f07e27', '#ee7422', '#e96b20', '#e36420', '#db5e20', '#d25921', '#ca5422', '#c14f22', '#b84b23', '#af4623', '#a64122', '#9e3d22',
+                    ].reverse()
+                },
+            ]
+        }
+    });
+</script>
+<h2 id="accept-a-request-and-return-html-response-with-a-custom-dynamic-header-html">Accept a request and return HTML response with a custom dynamic header {#html}</h2>
+<p>The test simulates just a single HTML response.</p>
+<p>Sorted by max req/s</p>
+<table>
+<thead>
+<tr>
+<th>Framework</th>
+<th style="text-align:right">Requests/sec</th>
+<th style="text-align:right">Latency 50% (ms)</th>
+<th style="text-align:right">Latency 75% (ms)</th>
+<th style="text-align:right">Latency Avg (ms)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_99_1/">fastapi_0_99_1</a> ``</td>
+<td style="text-align:right">33353</td>
+<td style="text-align:right">3.29</td>
+<td style="text-align:right">3.82</td>
+<td style="text-align:right">7.31</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_99_0/">fastapi_0_99_0</a> ``</td>
+<td style="text-align:right">34650</td>
+<td style="text-align:right">3.26</td>
+<td style="text-align:right">3.66</td>
+<td style="text-align:right">3.75</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_98_0/">fastapi_0_98_0</a> ``</td>
+<td style="text-align:right">34047</td>
+<td style="text-align:right">3.33</td>
+<td style="text-align:right">3.71</td>
+<td style="text-align:right">3.83</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_97_0/">fastapi_0_97_0</a> ``</td>
+<td style="text-align:right">34700</td>
+<td style="text-align:right">3.25</td>
+<td style="text-align:right">3.61</td>
+<td style="text-align:right">3.75</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_96_1/">fastapi_0_96_1</a> ``</td>
+<td style="text-align:right">34479</td>
+<td style="text-align:right">3.27</td>
+<td style="text-align:right">3.49</td>
+<td style="text-align:right">6.03</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_96_0/">fastapi_0_96_0</a> ``</td>
+<td style="text-align:right">33859</td>
+<td style="text-align:right">3.40</td>
+<td style="text-align:right">3.56</td>
+<td style="text-align:right">3.84</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_95_2/">fastapi_0_95_2</a> ``</td>
+<td style="text-align:right">34524</td>
+<td style="text-align:right">3.29</td>
+<td style="text-align:right">3.54</td>
+<td style="text-align:right">3.76</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_95_1/">fastapi_0_95_1</a> ``</td>
+<td style="text-align:right">34278</td>
+<td style="text-align:right">3.31</td>
+<td style="text-align:right">3.56</td>
+<td style="text-align:right">3.80</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_95_0/">fastapi_0_95_0</a> ``</td>
+<td style="text-align:right">34358</td>
+<td style="text-align:right">3.29</td>
+<td style="text-align:right">3.66</td>
+<td style="text-align:right">3.79</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_94_1/">fastapi_0_94_1</a> ``</td>
+<td style="text-align:right">34017</td>
+<td style="text-align:right">3.32</td>
+<td style="text-align:right">3.62</td>
+<td style="text-align:right">3.85</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_94_0/">fastapi_0_94_0</a> ``</td>
+<td style="text-align:right">34235</td>
+<td style="text-align:right">3.31</td>
+<td style="text-align:right">3.62</td>
+<td style="text-align:right">3.88</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_93_0/">fastapi_0_93_0</a> ``</td>
+<td style="text-align:right">33901</td>
+<td style="text-align:right">3.37</td>
+<td style="text-align:right">3.64</td>
+<td style="text-align:right">3.85</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_92_0/">fastapi_0_92_0</a> ``</td>
+<td style="text-align:right">34549</td>
+<td style="text-align:right">3.29</td>
+<td style="text-align:right">3.54</td>
+<td style="text-align:right">3.73</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_91_0/">fastapi_0_91_0</a> ``</td>
+<td style="text-align:right">34582</td>
+<td style="text-align:right">3.27</td>
+<td style="text-align:right">3.60</td>
+<td style="text-align:right">3.75</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_90_1/">fastapi_0_90_1</a> ``</td>
+<td style="text-align:right">34284</td>
+<td style="text-align:right">3.30</td>
+<td style="text-align:right">3.58</td>
+<td style="text-align:right">3.81</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_90_0/">fastapi_0_90_0</a> ``</td>
+<td style="text-align:right">34549</td>
+<td style="text-align:right">3.28</td>
+<td style="text-align:right">3.49</td>
+<td style="text-align:right">3.74</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_89_1/">fastapi_0_89_1</a> ``</td>
+<td style="text-align:right">34029</td>
+<td style="text-align:right">3.36</td>
+<td style="text-align:right">3.65</td>
+<td style="text-align:right">3.82</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_89_0/">fastapi_0_89_0</a> ``</td>
+<td style="text-align:right">35248</td>
+<td style="text-align:right">3.23</td>
+<td style="text-align:right">3.45</td>
+<td style="text-align:right">3.72</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_88_0/">fastapi_0_88_0</a> ``</td>
+<td style="text-align:right">34399</td>
+<td style="text-align:right">3.31</td>
+<td style="text-align:right">3.54</td>
+<td style="text-align:right">3.82</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_87_0/">fastapi_0_87_0</a> ``</td>
+<td style="text-align:right">34471</td>
+<td style="text-align:right">3.30</td>
+<td style="text-align:right">3.57</td>
+<td style="text-align:right">3.74</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_86_0/">fastapi_0_86_0</a> ``</td>
+<td style="text-align:right">33935</td>
+<td style="text-align:right">3.32</td>
+<td style="text-align:right">3.59</td>
+<td style="text-align:right">6.51</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_85_2/">fastapi_0_85_2</a> ``</td>
+<td style="text-align:right">34470</td>
+<td style="text-align:right">3.30</td>
+<td style="text-align:right">3.54</td>
+<td style="text-align:right">3.78</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_85_1/">fastapi_0_85_1</a> ``</td>
+<td style="text-align:right">34150</td>
+<td style="text-align:right">3.34</td>
+<td style="text-align:right">3.50</td>
+<td style="text-align:right">5.79</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_85_0/">fastapi_0_85_0</a> ``</td>
+<td style="text-align:right">35014</td>
+<td style="text-align:right">3.25</td>
+<td style="text-align:right">3.52</td>
+<td style="text-align:right">3.72</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_84_0/">fastapi_0_84_0</a> ``</td>
+<td style="text-align:right">34380</td>
+<td style="text-align:right">3.30</td>
+<td style="text-align:right">3.60</td>
+<td style="text-align:right">3.83</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_83_0/">fastapi_0_83_0</a> ``</td>
+<td style="text-align:right">34460</td>
+<td style="text-align:right">3.26</td>
+<td style="text-align:right">3.75</td>
+<td style="text-align:right">3.75</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_82_0/">fastapi_0_82_0</a> ``</td>
+<td style="text-align:right">34380</td>
+<td style="text-align:right">3.28</td>
+<td style="text-align:right">3.62</td>
+<td style="text-align:right">3.76</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_81_0/">fastapi_0_81_0</a> ``</td>
+<td style="text-align:right">34638</td>
+<td style="text-align:right">3.30</td>
+<td style="text-align:right">3.52</td>
+<td style="text-align:right">3.75</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_80_0/">fastapi_0_80_0</a> ``</td>
+<td style="text-align:right">34388</td>
+<td style="text-align:right">3.31</td>
+<td style="text-align:right">3.53</td>
+<td style="text-align:right">3.76</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_79_1/">fastapi_0_79_1</a> ``</td>
+<td style="text-align:right">34519</td>
+<td style="text-align:right">3.30</td>
+<td style="text-align:right">3.55</td>
+<td style="text-align:right">3.78</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_79_0/">fastapi_0_79_0</a> ``</td>
+<td style="text-align:right">34508</td>
+<td style="text-align:right">3.29</td>
+<td style="text-align:right">3.56</td>
+<td style="text-align:right">3.75</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_78_0/">fastapi_0_78_0</a> ``</td>
+<td style="text-align:right">34352</td>
+<td style="text-align:right">3.31</td>
+<td style="text-align:right">3.53</td>
+<td style="text-align:right">3.77</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_77_1/">fastapi_0_77_1</a> ``</td>
+<td style="text-align:right">35307</td>
+<td style="text-align:right">3.24</td>
+<td style="text-align:right">3.37</td>
+<td style="text-align:right">3.66</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_77_0/">fastapi_0_77_0</a> ``</td>
+<td style="text-align:right">35553</td>
+<td style="text-align:right">3.24</td>
+<td style="text-align:right">3.33</td>
+<td style="text-align:right">3.63</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_76_0/">fastapi_0_76_0</a> ``</td>
+<td style="text-align:right">34681</td>
+<td style="text-align:right">3.33</td>
+<td style="text-align:right">3.46</td>
+<td style="text-align:right">3.76</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_75_2/">fastapi_0_75_2</a> ``</td>
+<td style="text-align:right">37173</td>
+<td style="text-align:right">3.08</td>
+<td style="text-align:right">3.21</td>
+<td style="text-align:right">3.52</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_75_1/">fastapi_0_75_1</a> ``</td>
+<td style="text-align:right">36826</td>
+<td style="text-align:right">3.11</td>
+<td style="text-align:right">3.27</td>
+<td style="text-align:right">3.50</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_75_0/">fastapi_0_75_0</a> ``</td>
+<td style="text-align:right">36630</td>
+<td style="text-align:right">3.13</td>
+<td style="text-align:right">3.25</td>
+<td style="text-align:right">3.55</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_74_1/">fastapi_0_74_1</a> ``</td>
+<td style="text-align:right">35939</td>
+<td style="text-align:right">3.19</td>
+<td style="text-align:right">3.36</td>
+<td style="text-align:right">3.63</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_74_0/">fastapi_0_74_0</a> ``</td>
+<td style="text-align:right">38563</td>
+<td style="text-align:right">2.98</td>
+<td style="text-align:right">3.08</td>
+<td style="text-align:right">3.36</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_73_0/">fastapi_0_73_0</a> ``</td>
+<td style="text-align:right">37615</td>
+<td style="text-align:right">3.02</td>
+<td style="text-align:right">3.17</td>
+<td style="text-align:right">4.96</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_72_0/">fastapi_0_72_0</a> ``</td>
+<td style="text-align:right">37808</td>
+<td style="text-align:right">3.04</td>
+<td style="text-align:right">3.19</td>
+<td style="text-align:right">3.42</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_71_0/">fastapi_0_71_0</a> ``</td>
+<td style="text-align:right">37618</td>
+<td style="text-align:right">3.04</td>
+<td style="text-align:right">3.22</td>
+<td style="text-align:right">3.48</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_70_1/">fastapi_0_70_1</a> ``</td>
+<td style="text-align:right">38526</td>
+<td style="text-align:right">2.98</td>
+<td style="text-align:right">3.12</td>
+<td style="text-align:right">3.35</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_70_0/">fastapi_0_70_0</a> ``</td>
+<td style="text-align:right">37454</td>
+<td style="text-align:right">3.08</td>
+<td style="text-align:right">3.22</td>
+<td style="text-align:right">3.46</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_69_0/">fastapi_0_69_0</a> ``</td>
+<td style="text-align:right">38417</td>
+<td style="text-align:right">2.98</td>
+<td style="text-align:right">3.13</td>
+<td style="text-align:right">3.40</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_68_2/">fastapi_0_68_2</a> ``</td>
+<td style="text-align:right">38362</td>
+<td style="text-align:right">3.00</td>
+<td style="text-align:right">3.09</td>
+<td style="text-align:right">3.43</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_68_1/">fastapi_0_68_1</a> ``</td>
+<td style="text-align:right">38682</td>
+<td style="text-align:right">2.96</td>
+<td style="text-align:right">3.08</td>
+<td style="text-align:right">3.36</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_68_0/">fastapi_0_68_0</a> ``</td>
+<td style="text-align:right">37716</td>
+<td style="text-align:right">3.05</td>
+<td style="text-align:right">3.20</td>
+<td style="text-align:right">3.44</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_67_0/">fastapi_0_67_0</a> ``</td>
+<td style="text-align:right">38126</td>
+<td style="text-align:right">3.00</td>
+<td style="text-align:right">3.17</td>
+<td style="text-align:right">3.39</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_66_1/">fastapi_0_66_1</a> ``</td>
+<td style="text-align:right">37800</td>
+<td style="text-align:right">3.03</td>
+<td style="text-align:right">3.17</td>
+<td style="text-align:right">3.43</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_66_0/">fastapi_0_66_0</a> ``</td>
+<td style="text-align:right">38296</td>
+<td style="text-align:right">2.99</td>
+<td style="text-align:right">3.10</td>
+<td style="text-align:right">3.39</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_65_3/">fastapi_0_65_3</a> ``</td>
+<td style="text-align:right">38169</td>
+<td style="text-align:right">3.00</td>
+<td style="text-align:right">3.19</td>
+<td style="text-align:right">3.40</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_65_2/">fastapi_0_65_2</a> ``</td>
+<td style="text-align:right">38177</td>
+<td style="text-align:right">3.00</td>
+<td style="text-align:right">3.15</td>
+<td style="text-align:right">3.39</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_65_1/">fastapi_0_65_1</a> ``</td>
+<td style="text-align:right">37615</td>
+<td style="text-align:right">3.06</td>
+<td style="text-align:right">3.18</td>
+<td style="text-align:right">5.29</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_65_0/">fastapi_0_65_0</a> ``</td>
+<td style="text-align:right">38620</td>
+<td style="text-align:right">2.96</td>
+<td style="text-align:right">3.13</td>
+<td style="text-align:right">3.35</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_64_0/">fastapi_0_64_0</a> ``</td>
+<td style="text-align:right">37367</td>
+<td style="text-align:right">3.05</td>
+<td style="text-align:right">3.28</td>
+<td style="text-align:right">3.48</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_63_0/">fastapi_0_63_0</a> ``</td>
+<td style="text-align:right">38276</td>
+<td style="text-align:right">2.99</td>
+<td style="text-align:right">3.18</td>
+<td style="text-align:right">3.41</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_62_0/">fastapi_0_62_0</a> ``</td>
+<td style="text-align:right">38307</td>
+<td style="text-align:right">2.98</td>
+<td style="text-align:right">3.15</td>
+<td style="text-align:right">3.98</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_61_2/">fastapi_0_61_2</a> ``</td>
+<td style="text-align:right">38124</td>
+<td style="text-align:right">3.01</td>
+<td style="text-align:right">3.15</td>
+<td style="text-align:right">3.39</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_61_1/">fastapi_0_61_1</a> ``</td>
+<td style="text-align:right">37128</td>
+<td style="text-align:right">3.03</td>
+<td style="text-align:right">3.31</td>
+<td style="text-align:right">5.07</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_61_0/">fastapi_0_61_0</a> ``</td>
+<td style="text-align:right">37718</td>
+<td style="text-align:right">3.02</td>
+<td style="text-align:right">3.24</td>
+<td style="text-align:right">3.47</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_60_2/">fastapi_0_60_2</a> ``</td>
+<td style="text-align:right">37422</td>
+<td style="text-align:right">3.00</td>
+<td style="text-align:right">3.33</td>
+<td style="text-align:right">6.39</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_60_1/">fastapi_0_60_1</a> ``</td>
+<td style="text-align:right">37074</td>
+<td style="text-align:right">3.07</td>
+<td style="text-align:right">3.30</td>
+<td style="text-align:right">3.64</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_60_0/">fastapi_0_60_0</a> ``</td>
+<td style="text-align:right">37953</td>
+<td style="text-align:right">2.99</td>
+<td style="text-align:right">3.22</td>
+<td style="text-align:right">3.44</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_59_0/">fastapi_0_59_0</a> ``</td>
+<td style="text-align:right">37999</td>
+<td style="text-align:right">3.00</td>
+<td style="text-align:right">3.21</td>
+<td style="text-align:right">3.42</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_58_1/">fastapi_0_58_1</a> ``</td>
+<td style="text-align:right">37868</td>
+<td style="text-align:right">2.99</td>
+<td style="text-align:right">3.24</td>
+<td style="text-align:right">3.56</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_58_0/">fastapi_0_58_0</a> ``</td>
+<td style="text-align:right">37743</td>
+<td style="text-align:right">3.00</td>
+<td style="text-align:right">3.26</td>
+<td style="text-align:right">3.49</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_57_0/">fastapi_0_57_0</a> ``</td>
+<td style="text-align:right">37499</td>
+<td style="text-align:right">2.97</td>
+<td style="text-align:right">3.37</td>
+<td style="text-align:right">5.03</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_56_1/">fastapi_0_56_1</a> ``</td>
+<td style="text-align:right">37647</td>
+<td style="text-align:right">2.99</td>
+<td style="text-align:right">3.33</td>
+<td style="text-align:right">3.97</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_56_0/">fastapi_0_56_0</a> ``</td>
+<td style="text-align:right">37566</td>
+<td style="text-align:right">3.01</td>
+<td style="text-align:right">3.32</td>
+<td style="text-align:right">3.49</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_55_1/">fastapi_0_55_1</a> ``</td>
+<td style="text-align:right">37999</td>
+<td style="text-align:right">2.99</td>
+<td style="text-align:right">3.23</td>
+<td style="text-align:right">3.43</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_55_0/">fastapi_0_55_0</a> ``</td>
+<td style="text-align:right">37905</td>
+<td style="text-align:right">3.00</td>
+<td style="text-align:right">3.25</td>
+<td style="text-align:right">3.45</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_54_2/">fastapi_0_54_2</a> ``</td>
+<td style="text-align:right">37575</td>
+<td style="text-align:right">3.02</td>
+<td style="text-align:right">3.36</td>
+<td style="text-align:right">3.45</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_54_1/">fastapi_0_54_1</a> ``</td>
+<td style="text-align:right">37747</td>
+<td style="text-align:right">2.99</td>
+<td style="text-align:right">3.19</td>
+<td style="text-align:right">4.27</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_54_0/">fastapi_0_54_0</a> ``</td>
+<td style="text-align:right">37583</td>
+<td style="text-align:right">3.01</td>
+<td style="text-align:right">3.38</td>
+<td style="text-align:right">3.49</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_53_2/">fastapi_0_53_2</a> ``</td>
+<td style="text-align:right">36960</td>
+<td style="text-align:right">3.08</td>
+<td style="text-align:right">3.34</td>
+<td style="text-align:right">3.51</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_53_1/">fastapi_0_53_1</a> ``</td>
+<td style="text-align:right">36801</td>
+<td style="text-align:right">3.12</td>
+<td style="text-align:right">3.29</td>
+<td style="text-align:right">3.67</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_53_0/">fastapi_0_53_0</a> ``</td>
+<td style="text-align:right">37834</td>
+<td style="text-align:right">2.99</td>
+<td style="text-align:right">3.26</td>
+<td style="text-align:right">3.51</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_52_0/">fastapi_0_52_0</a> ``</td>
+<td style="text-align:right">37687</td>
+<td style="text-align:right">3.01</td>
+<td style="text-align:right">3.31</td>
+<td style="text-align:right">3.47</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_51_0/">fastapi_0_51_0</a> ``</td>
+<td style="text-align:right">37714</td>
+<td style="text-align:right">3.00</td>
+<td style="text-align:right">3.23</td>
+<td style="text-align:right">3.78</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_117_1/">fastapi_0_117_1</a> ``</td>
+<td style="text-align:right">31215</td>
+<td style="text-align:right">3.63</td>
+<td style="text-align:right">3.94</td>
+<td style="text-align:right">4.71</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_117_0/">fastapi_0_117_0</a> ``</td>
+<td style="text-align:right">31488</td>
+<td style="text-align:right">3.58</td>
+<td style="text-align:right">3.93</td>
+<td style="text-align:right">4.95</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_116_2/">fastapi_0_116_2</a> ``</td>
+<td style="text-align:right">30958</td>
+<td style="text-align:right">3.69</td>
+<td style="text-align:right">3.87</td>
+<td style="text-align:right">4.51</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_116_1/">fastapi_0_116_1</a> ``</td>
+<td style="text-align:right">31375</td>
+<td style="text-align:right">3.63</td>
+<td style="text-align:right">3.87</td>
+<td style="text-align:right">4.45</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_116_0/">fastapi_0_116_0</a> ``</td>
+<td style="text-align:right">31319</td>
+<td style="text-align:right">3.64</td>
+<td style="text-align:right">3.89</td>
+<td style="text-align:right">4.49</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_9/">fastapi_0_115_9</a> ``</td>
+<td style="text-align:right">30831</td>
+<td style="text-align:right">3.70</td>
+<td style="text-align:right">3.96</td>
+<td style="text-align:right">5.26</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_8/">fastapi_0_115_8</a> ``</td>
+<td style="text-align:right">31534</td>
+<td style="text-align:right">3.59</td>
+<td style="text-align:right">3.83</td>
+<td style="text-align:right">5.45</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_7/">fastapi_0_115_7</a> ``</td>
+<td style="text-align:right">31740</td>
+<td style="text-align:right">3.61</td>
+<td style="text-align:right">3.76</td>
+<td style="text-align:right">4.36</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_6/">fastapi_0_115_6</a> ``</td>
+<td style="text-align:right">31471</td>
+<td style="text-align:right">3.56</td>
+<td style="text-align:right">3.92</td>
+<td style="text-align:right">5.97</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_5/">fastapi_0_115_5</a> ``</td>
+<td style="text-align:right">31118</td>
+<td style="text-align:right">3.65</td>
+<td style="text-align:right">3.90</td>
+<td style="text-align:right">5.35</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_4/">fastapi_0_115_4</a> ``</td>
+<td style="text-align:right">31639</td>
+<td style="text-align:right">3.61</td>
+<td style="text-align:right">3.78</td>
+<td style="text-align:right">4.35</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_3/">fastapi_0_115_3</a> ``</td>
+<td style="text-align:right">30812</td>
+<td style="text-align:right">3.62</td>
+<td style="text-align:right">4.16</td>
+<td style="text-align:right">5.57</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_2/">fastapi_0_115_2</a> ``</td>
+<td style="text-align:right">30905</td>
+<td style="text-align:right">3.63</td>
+<td style="text-align:right">4.07</td>
+<td style="text-align:right">5.58</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_14/">fastapi_0_115_14</a> ``</td>
+<td style="text-align:right">31705</td>
+<td style="text-align:right">3.58</td>
+<td style="text-align:right">3.79</td>
+<td style="text-align:right">5.08</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_13/">fastapi_0_115_13</a> ``</td>
+<td style="text-align:right">31461</td>
+<td style="text-align:right">3.56</td>
+<td style="text-align:right">3.88</td>
+<td style="text-align:right">5.36</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_12/">fastapi_0_115_12</a> ``</td>
+<td style="text-align:right">31548</td>
+<td style="text-align:right">3.58</td>
+<td style="text-align:right">3.80</td>
+<td style="text-align:right">5.62</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_11/">fastapi_0_115_11</a> ``</td>
+<td style="text-align:right">31326</td>
+<td style="text-align:right">3.67</td>
+<td style="text-align:right">3.84</td>
+<td style="text-align:right">4.49</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_10/">fastapi_0_115_10</a> ``</td>
+<td style="text-align:right">30741</td>
+<td style="text-align:right">3.66</td>
+<td style="text-align:right">4.01</td>
+<td style="text-align:right">6.08</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_1/">fastapi_0_115_1</a> ``</td>
+<td style="text-align:right">25941</td>
+<td style="text-align:right">4.36</td>
+<td style="text-align:right">4.69</td>
+<td style="text-align:right">5.81</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_0/">fastapi_0_115_0</a> ``</td>
+<td style="text-align:right">26217</td>
+<td style="text-align:right">4.34</td>
+<td style="text-align:right">4.56</td>
+<td style="text-align:right">6.34</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_114_2/">fastapi_0_114_2</a> ``</td>
+<td style="text-align:right">26224</td>
+<td style="text-align:right">4.33</td>
+<td style="text-align:right">4.58</td>
+<td style="text-align:right">6.92</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_114_1/">fastapi_0_114_1</a> ``</td>
+<td style="text-align:right">26483</td>
+<td style="text-align:right">4.27</td>
+<td style="text-align:right">4.58</td>
+<td style="text-align:right">6.67</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_114_0/">fastapi_0_114_0</a> ``</td>
+<td style="text-align:right">26262</td>
+<td style="text-align:right">4.35</td>
+<td style="text-align:right">4.53</td>
+<td style="text-align:right">6.65</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_113_0/">fastapi_0_113_0</a> ``</td>
+<td style="text-align:right">25846</td>
+<td style="text-align:right">4.42</td>
+<td style="text-align:right">4.64</td>
+<td style="text-align:right">5.73</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_4/">fastapi_0_112_4</a> ``</td>
+<td style="text-align:right">26263</td>
+<td style="text-align:right">4.31</td>
+<td style="text-align:right">4.64</td>
+<td style="text-align:right">6.90</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_3/">fastapi_0_112_3</a> ``</td>
+<td style="text-align:right">25891</td>
+<td style="text-align:right">4.33</td>
+<td style="text-align:right">4.95</td>
+<td style="text-align:right">6.34</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_2/">fastapi_0_112_2</a> ``</td>
+<td style="text-align:right">25960</td>
+<td style="text-align:right">4.35</td>
+<td style="text-align:right">4.69</td>
+<td style="text-align:right">6.86</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_1/">fastapi_0_112_1</a> ``</td>
+<td style="text-align:right">26498</td>
+<td style="text-align:right">4.29</td>
+<td style="text-align:right">4.50</td>
+<td style="text-align:right">5.94</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_0/">fastapi_0_112_0</a> ``</td>
+<td style="text-align:right">25066</td>
+<td style="text-align:right">4.31</td>
+<td style="text-align:right">4.87</td>
+<td style="text-align:right">42.40</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_111_1/">fastapi_0_111_1</a> ``</td>
+<td style="text-align:right">26015</td>
+<td style="text-align:right">4.37</td>
+<td style="text-align:right">4.60</td>
+<td style="text-align:right">6.64</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_111_0_dev1/">fastapi_0_111_0_dev1</a> ``</td>
+<td style="text-align:right">26128</td>
+<td style="text-align:right">4.32</td>
+<td style="text-align:right">4.72</td>
+<td style="text-align:right">7.26</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_111_0/">fastapi_0_111_0</a> ``</td>
+<td style="text-align:right">26145</td>
+<td style="text-align:right">4.32</td>
+<td style="text-align:right">4.62</td>
+<td style="text-align:right">6.18</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_3_dev2/">fastapi_0_110_3_dev2</a> ``</td>
+<td style="text-align:right">26141</td>
+<td style="text-align:right">4.34</td>
+<td style="text-align:right">4.63</td>
+<td style="text-align:right">7.06</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_3_dev1/">fastapi_0_110_3_dev1</a> ``</td>
+<td style="text-align:right">26597</td>
+<td style="text-align:right">4.25</td>
+<td style="text-align:right">4.54</td>
+<td style="text-align:right">6.35</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_3/">fastapi_0_110_3</a> ``</td>
+<td style="text-align:right">25342</td>
+<td style="text-align:right">4.29</td>
+<td style="text-align:right">4.85</td>
+<td style="text-align:right">40.04</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_2/">fastapi_0_110_2</a> ``</td>
+<td style="text-align:right">26294</td>
+<td style="text-align:right">4.31</td>
+<td style="text-align:right">4.64</td>
+<td style="text-align:right">6.25</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_1/">fastapi_0_110_1</a> ``</td>
+<td style="text-align:right">26175</td>
+<td style="text-align:right">4.31</td>
+<td style="text-align:right">4.69</td>
+<td style="text-align:right">6.95</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_0/">fastapi_0_110_0</a> ``</td>
+<td style="text-align:right">26358</td>
+<td style="text-align:right">4.31</td>
+<td style="text-align:right">4.56</td>
+<td style="text-align:right">6.38</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_109_2/">fastapi_0_109_2</a> ``</td>
+<td style="text-align:right">26324</td>
+<td style="text-align:right">4.28</td>
+<td style="text-align:right">4.74</td>
+<td style="text-align:right">6.26</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_109_1/">fastapi_0_109_1</a> ``</td>
+<td style="text-align:right">26980</td>
+<td style="text-align:right">4.19</td>
+<td style="text-align:right">4.44</td>
+<td style="text-align:right">6.42</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_109_0/">fastapi_0_109_0</a> ``</td>
+<td style="text-align:right">25573</td>
+<td style="text-align:right">4.24</td>
+<td style="text-align:right">4.79</td>
+<td style="text-align:right">43.68</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_108_0/">fastapi_0_108_0</a> ``</td>
+<td style="text-align:right">30959</td>
+<td style="text-align:right">3.56</td>
+<td style="text-align:right">4.05</td>
+<td style="text-align:right">20.47</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_107_0/">fastapi_0_107_0</a> ``</td>
+<td style="text-align:right">32332</td>
+<td style="text-align:right">3.50</td>
+<td style="text-align:right">3.74</td>
+<td style="text-align:right">5.89</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_106_0/">fastapi_0_106_0</a> ``</td>
+<td style="text-align:right">34229</td>
+<td style="text-align:right">3.29</td>
+<td style="text-align:right">3.59</td>
+<td style="text-align:right">5.21</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_105_0/">fastapi_0_105_0</a> ``</td>
+<td style="text-align:right">33997</td>
+<td style="text-align:right">3.31</td>
+<td style="text-align:right">3.64</td>
+<td style="text-align:right">5.81</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_104_1/">fastapi_0_104_1</a> ``</td>
+<td style="text-align:right">34496</td>
+<td style="text-align:right">3.29</td>
+<td style="text-align:right">3.51</td>
+<td style="text-align:right">4.07</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_104_0/">fastapi_0_104_0</a> ``</td>
+<td style="text-align:right">34789</td>
+<td style="text-align:right">3.25</td>
+<td style="text-align:right">3.58</td>
+<td style="text-align:right">3.99</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_103_2/">fastapi_0_103_2</a> ``</td>
+<td style="text-align:right">34039</td>
+<td style="text-align:right">3.31</td>
+<td style="text-align:right">3.65</td>
+<td style="text-align:right">4.16</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_103_1/">fastapi_0_103_1</a> ``</td>
+<td style="text-align:right">34223</td>
+<td style="text-align:right">3.29</td>
+<td style="text-align:right">3.67</td>
+<td style="text-align:right">4.82</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_103_0/">fastapi_0_103_0</a> ``</td>
+<td style="text-align:right">34573</td>
+<td style="text-align:right">3.28</td>
+<td style="text-align:right">3.59</td>
+<td style="text-align:right">4.03</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_102_0/">fastapi_0_102_0</a> ``</td>
+<td style="text-align:right">34417</td>
+<td style="text-align:right">3.30</td>
+<td style="text-align:right">3.52</td>
+<td style="text-align:right">4.10</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_101_1/">fastapi_0_101_1</a> ``</td>
+<td style="text-align:right">34013</td>
+<td style="text-align:right">3.31</td>
+<td style="text-align:right">3.64</td>
+<td style="text-align:right">5.82</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_101_0/">fastapi_0_101_0</a> ``</td>
+<td style="text-align:right">34199</td>
+<td style="text-align:right">3.29</td>
+<td style="text-align:right">3.67</td>
+<td style="text-align:right">4.47</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_100_1/">fastapi_0_100_1</a> ``</td>
+<td style="text-align:right">33377</td>
+<td style="text-align:right">3.36</td>
+<td style="text-align:right">3.82</td>
+<td style="text-align:right">5.40</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_100_0/">fastapi_0_100_0</a> ``</td>
+<td style="text-align:right">34416</td>
+<td style="text-align:right">3.30</td>
+<td style="text-align:right">3.52</td>
+<td style="text-align:right">4.67</td>
+</tr>
+</tbody>
+</table>
+<h2 id="parse-path-params-query-string-json-body-and-return-a-json-response--api">Parse path params, query string, JSON body and return a json response  {#api}</h2>
+<p>The test simulates a simple JSON REST API endpoint.</p>
+<p>Sorted by max req/s</p>
+<table>
+<thead>
+<tr>
+<th>Framework</th>
+<th style="text-align:right">Requests/sec</th>
+<th style="text-align:right">Latency 50% (ms)</th>
+<th style="text-align:right">Latency 75% (ms)</th>
+<th style="text-align:right">Latency Avg (ms)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_99_1/">fastapi_0_99_1</a> ``</td>
+<td style="text-align:right">22955</td>
+<td style="text-align:right">5.01</td>
+<td style="text-align:right">5.22</td>
+<td style="text-align:right">5.64</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_99_0/">fastapi_0_99_0</a> ``</td>
+<td style="text-align:right">22774</td>
+<td style="text-align:right">5.03</td>
+<td style="text-align:right">5.29</td>
+<td style="text-align:right">5.68</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_98_0/">fastapi_0_98_0</a> ``</td>
+<td style="text-align:right">22601</td>
+<td style="text-align:right">5.06</td>
+<td style="text-align:right">5.36</td>
+<td style="text-align:right">5.71</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_97_0/">fastapi_0_97_0</a> ``</td>
+<td style="text-align:right">22817</td>
+<td style="text-align:right">4.97</td>
+<td style="text-align:right">5.26</td>
+<td style="text-align:right">5.66</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_96_1/">fastapi_0_96_1</a> ``</td>
+<td style="text-align:right">22720</td>
+<td style="text-align:right">5.03</td>
+<td style="text-align:right">5.47</td>
+<td style="text-align:right">5.67</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_96_0/">fastapi_0_96_0</a> ``</td>
+<td style="text-align:right">22470</td>
+<td style="text-align:right">5.11</td>
+<td style="text-align:right">5.37</td>
+<td style="text-align:right">5.75</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_95_2/">fastapi_0_95_2</a> ``</td>
+<td style="text-align:right">22830</td>
+<td style="text-align:right">5.00</td>
+<td style="text-align:right">5.32</td>
+<td style="text-align:right">5.65</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_95_1/">fastapi_0_95_1</a> ``</td>
+<td style="text-align:right">22588</td>
+<td style="text-align:right">5.08</td>
+<td style="text-align:right">5.37</td>
+<td style="text-align:right">5.73</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_95_0/">fastapi_0_95_0</a> ``</td>
+<td style="text-align:right">23009</td>
+<td style="text-align:right">4.98</td>
+<td style="text-align:right">5.19</td>
+<td style="text-align:right">5.61</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_94_1/">fastapi_0_94_1</a> ``</td>
+<td style="text-align:right">22705</td>
+<td style="text-align:right">5.08</td>
+<td style="text-align:right">5.34</td>
+<td style="text-align:right">5.69</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_94_0/">fastapi_0_94_0</a> ``</td>
+<td style="text-align:right">22575</td>
+<td style="text-align:right">5.08</td>
+<td style="text-align:right">5.37</td>
+<td style="text-align:right">5.72</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_93_0/">fastapi_0_93_0</a> ``</td>
+<td style="text-align:right">22525</td>
+<td style="text-align:right">5.13</td>
+<td style="text-align:right">5.34</td>
+<td style="text-align:right">5.73</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_92_0/">fastapi_0_92_0</a> ``</td>
+<td style="text-align:right">22891</td>
+<td style="text-align:right">5.02</td>
+<td style="text-align:right">5.27</td>
+<td style="text-align:right">5.65</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_91_0/">fastapi_0_91_0</a> ``</td>
+<td style="text-align:right">22980</td>
+<td style="text-align:right">5.00</td>
+<td style="text-align:right">5.23</td>
+<td style="text-align:right">5.62</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_90_1/">fastapi_0_90_1</a> ``</td>
+<td style="text-align:right">22882</td>
+<td style="text-align:right">5.07</td>
+<td style="text-align:right">5.27</td>
+<td style="text-align:right">5.64</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_90_0/">fastapi_0_90_0</a> ``</td>
+<td style="text-align:right">22650</td>
+<td style="text-align:right">5.09</td>
+<td style="text-align:right">5.32</td>
+<td style="text-align:right">5.69</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_89_1/">fastapi_0_89_1</a> ``</td>
+<td style="text-align:right">22836</td>
+<td style="text-align:right">5.02</td>
+<td style="text-align:right">5.29</td>
+<td style="text-align:right">5.66</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_89_0/">fastapi_0_89_0</a> ``</td>
+<td style="text-align:right">22970</td>
+<td style="text-align:right">4.97</td>
+<td style="text-align:right">5.26</td>
+<td style="text-align:right">5.62</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_88_0/">fastapi_0_88_0</a> ``</td>
+<td style="text-align:right">22711</td>
+<td style="text-align:right">5.04</td>
+<td style="text-align:right">5.34</td>
+<td style="text-align:right">5.69</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_87_0/">fastapi_0_87_0</a> ``</td>
+<td style="text-align:right">22594</td>
+<td style="text-align:right">5.09</td>
+<td style="text-align:right">5.36</td>
+<td style="text-align:right">5.72</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_86_0/">fastapi_0_86_0</a> ``</td>
+<td style="text-align:right">22625</td>
+<td style="text-align:right">5.04</td>
+<td style="text-align:right">5.36</td>
+<td style="text-align:right">5.71</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_85_2/">fastapi_0_85_2</a> ``</td>
+<td style="text-align:right">22221</td>
+<td style="text-align:right">5.17</td>
+<td style="text-align:right">5.50</td>
+<td style="text-align:right">5.80</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_85_1/">fastapi_0_85_1</a> ``</td>
+<td style="text-align:right">22519</td>
+<td style="text-align:right">5.17</td>
+<td style="text-align:right">5.40</td>
+<td style="text-align:right">5.73</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_85_0/">fastapi_0_85_0</a> ``</td>
+<td style="text-align:right">22756</td>
+<td style="text-align:right">5.04</td>
+<td style="text-align:right">5.33</td>
+<td style="text-align:right">5.66</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_84_0/">fastapi_0_84_0</a> ``</td>
+<td style="text-align:right">22974</td>
+<td style="text-align:right">5.00</td>
+<td style="text-align:right">5.28</td>
+<td style="text-align:right">5.63</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_83_0/">fastapi_0_83_0</a> ``</td>
+<td style="text-align:right">22975</td>
+<td style="text-align:right">5.00</td>
+<td style="text-align:right">5.24</td>
+<td style="text-align:right">5.62</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_82_0/">fastapi_0_82_0</a> ``</td>
+<td style="text-align:right">22708</td>
+<td style="text-align:right">5.04</td>
+<td style="text-align:right">5.34</td>
+<td style="text-align:right">5.69</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_81_0/">fastapi_0_81_0</a> ``</td>
+<td style="text-align:right">22914</td>
+<td style="text-align:right">4.99</td>
+<td style="text-align:right">5.34</td>
+<td style="text-align:right">5.64</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_80_0/">fastapi_0_80_0</a> ``</td>
+<td style="text-align:right">23039</td>
+<td style="text-align:right">4.99</td>
+<td style="text-align:right">5.18</td>
+<td style="text-align:right">5.60</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_79_1/">fastapi_0_79_1</a> ``</td>
+<td style="text-align:right">22500</td>
+<td style="text-align:right">5.08</td>
+<td style="text-align:right">5.44</td>
+<td style="text-align:right">5.74</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_79_0/">fastapi_0_79_0</a> ``</td>
+<td style="text-align:right">22690</td>
+<td style="text-align:right">5.02</td>
+<td style="text-align:right">5.44</td>
+<td style="text-align:right">5.69</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_78_0/">fastapi_0_78_0</a> ``</td>
+<td style="text-align:right">22840</td>
+<td style="text-align:right">5.06</td>
+<td style="text-align:right">5.26</td>
+<td style="text-align:right">5.66</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_77_1/">fastapi_0_77_1</a> ``</td>
+<td style="text-align:right">23127</td>
+<td style="text-align:right">5.00</td>
+<td style="text-align:right">5.14</td>
+<td style="text-align:right">5.58</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_77_0/">fastapi_0_77_0</a> ``</td>
+<td style="text-align:right">23268</td>
+<td style="text-align:right">4.98</td>
+<td style="text-align:right">5.13</td>
+<td style="text-align:right">5.54</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_76_0/">fastapi_0_76_0</a> ``</td>
+<td style="text-align:right">22713</td>
+<td style="text-align:right">5.11</td>
+<td style="text-align:right">5.30</td>
+<td style="text-align:right">5.70</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_75_2/">fastapi_0_75_2</a> ``</td>
+<td style="text-align:right">24241</td>
+<td style="text-align:right">4.77</td>
+<td style="text-align:right">4.89</td>
+<td style="text-align:right">5.34</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_75_1/">fastapi_0_75_1</a> ``</td>
+<td style="text-align:right">23699</td>
+<td style="text-align:right">4.87</td>
+<td style="text-align:right">5.07</td>
+<td style="text-align:right">5.46</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_75_0/">fastapi_0_75_0</a> ``</td>
+<td style="text-align:right">23790</td>
+<td style="text-align:right">4.84</td>
+<td style="text-align:right">5.03</td>
+<td style="text-align:right">5.43</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_74_1/">fastapi_0_74_1</a> ``</td>
+<td style="text-align:right">23480</td>
+<td style="text-align:right">4.93</td>
+<td style="text-align:right">5.17</td>
+<td style="text-align:right">5.49</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_74_0/">fastapi_0_74_0</a> ``</td>
+<td style="text-align:right">24712</td>
+<td style="text-align:right">4.66</td>
+<td style="text-align:right">4.81</td>
+<td style="text-align:right">5.23</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_73_0/">fastapi_0_73_0</a> ``</td>
+<td style="text-align:right">24502</td>
+<td style="text-align:right">4.70</td>
+<td style="text-align:right">4.88</td>
+<td style="text-align:right">5.27</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_72_0/">fastapi_0_72_0</a> ``</td>
+<td style="text-align:right">24270</td>
+<td style="text-align:right">4.75</td>
+<td style="text-align:right">4.97</td>
+<td style="text-align:right">5.31</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_71_0/">fastapi_0_71_0</a> ``</td>
+<td style="text-align:right">24295</td>
+<td style="text-align:right">4.74</td>
+<td style="text-align:right">4.96</td>
+<td style="text-align:right">5.31</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_70_1/">fastapi_0_70_1</a> ``</td>
+<td style="text-align:right">24761</td>
+<td style="text-align:right">4.66</td>
+<td style="text-align:right">4.84</td>
+<td style="text-align:right">5.21</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_70_0/">fastapi_0_70_0</a> ``</td>
+<td style="text-align:right">24015</td>
+<td style="text-align:right">4.84</td>
+<td style="text-align:right">5.01</td>
+<td style="text-align:right">5.38</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_69_0/">fastapi_0_69_0</a> ``</td>
+<td style="text-align:right">24576</td>
+<td style="text-align:right">4.66</td>
+<td style="text-align:right">4.89</td>
+<td style="text-align:right">5.25</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_68_2/">fastapi_0_68_2</a> ``</td>
+<td style="text-align:right">24421</td>
+<td style="text-align:right">4.75</td>
+<td style="text-align:right">4.88</td>
+<td style="text-align:right">5.29</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_68_1/">fastapi_0_68_1</a> ``</td>
+<td style="text-align:right">24528</td>
+<td style="text-align:right">4.70</td>
+<td style="text-align:right">4.85</td>
+<td style="text-align:right">5.26</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_68_0/">fastapi_0_68_0</a> ``</td>
+<td style="text-align:right">24408</td>
+<td style="text-align:right">4.73</td>
+<td style="text-align:right">4.96</td>
+<td style="text-align:right">5.29</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_67_0/">fastapi_0_67_0</a> ``</td>
+<td style="text-align:right">24463</td>
+<td style="text-align:right">4.74</td>
+<td style="text-align:right">4.92</td>
+<td style="text-align:right">5.28</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_66_1/">fastapi_0_66_1</a> ``</td>
+<td style="text-align:right">24480</td>
+<td style="text-align:right">4.72</td>
+<td style="text-align:right">4.88</td>
+<td style="text-align:right">5.27</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_66_0/">fastapi_0_66_0</a> ``</td>
+<td style="text-align:right">24242</td>
+<td style="text-align:right">4.80</td>
+<td style="text-align:right">4.97</td>
+<td style="text-align:right">5.33</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_65_3/">fastapi_0_65_3</a> ``</td>
+<td style="text-align:right">24643</td>
+<td style="text-align:right">4.67</td>
+<td style="text-align:right">4.87</td>
+<td style="text-align:right">5.24</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_65_2/">fastapi_0_65_2</a> ``</td>
+<td style="text-align:right">24647</td>
+<td style="text-align:right">4.67</td>
+<td style="text-align:right">4.85</td>
+<td style="text-align:right">5.23</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_65_1/">fastapi_0_65_1</a> ``</td>
+<td style="text-align:right">24582</td>
+<td style="text-align:right">4.72</td>
+<td style="text-align:right">4.89</td>
+<td style="text-align:right">5.26</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_65_0/">fastapi_0_65_0</a> ``</td>
+<td style="text-align:right">24774</td>
+<td style="text-align:right">4.64</td>
+<td style="text-align:right">4.86</td>
+<td style="text-align:right">5.22</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_64_0/">fastapi_0_64_0</a> ``</td>
+<td style="text-align:right">24355</td>
+<td style="text-align:right">4.75</td>
+<td style="text-align:right">4.93</td>
+<td style="text-align:right">5.28</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_63_0/">fastapi_0_63_0</a> ``</td>
+<td style="text-align:right">24951</td>
+<td style="text-align:right">4.63</td>
+<td style="text-align:right">4.81</td>
+<td style="text-align:right">5.17</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_62_0/">fastapi_0_62_0</a> ``</td>
+<td style="text-align:right">24829</td>
+<td style="text-align:right">4.65</td>
+<td style="text-align:right">4.86</td>
+<td style="text-align:right">5.21</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_61_2/">fastapi_0_61_2</a> ``</td>
+<td style="text-align:right">24255</td>
+<td style="text-align:right">4.73</td>
+<td style="text-align:right">4.97</td>
+<td style="text-align:right">5.32</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_61_1/">fastapi_0_61_1</a> ``</td>
+<td style="text-align:right">24309</td>
+<td style="text-align:right">4.73</td>
+<td style="text-align:right">4.92</td>
+<td style="text-align:right">5.30</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_61_0/">fastapi_0_61_0</a> ``</td>
+<td style="text-align:right">24137</td>
+<td style="text-align:right">4.75</td>
+<td style="text-align:right">5.01</td>
+<td style="text-align:right">5.36</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_60_2/">fastapi_0_60_2</a> ``</td>
+<td style="text-align:right">24367</td>
+<td style="text-align:right">4.71</td>
+<td style="text-align:right">4.95</td>
+<td style="text-align:right">5.30</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_60_1/">fastapi_0_60_1</a> ``</td>
+<td style="text-align:right">23709</td>
+<td style="text-align:right">4.84</td>
+<td style="text-align:right">5.11</td>
+<td style="text-align:right">5.45</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_60_0/">fastapi_0_60_0</a> ``</td>
+<td style="text-align:right">24136</td>
+<td style="text-align:right">4.72</td>
+<td style="text-align:right">5.04</td>
+<td style="text-align:right">5.36</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_59_0/">fastapi_0_59_0</a> ``</td>
+<td style="text-align:right">24255</td>
+<td style="text-align:right">4.70</td>
+<td style="text-align:right">5.05</td>
+<td style="text-align:right">5.32</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_58_1/">fastapi_0_58_1</a> ``</td>
+<td style="text-align:right">24283</td>
+<td style="text-align:right">4.75</td>
+<td style="text-align:right">4.96</td>
+<td style="text-align:right">5.32</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_58_0/">fastapi_0_58_0</a> ``</td>
+<td style="text-align:right">23971</td>
+<td style="text-align:right">4.77</td>
+<td style="text-align:right">5.08</td>
+<td style="text-align:right">5.40</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_57_0/">fastapi_0_57_0</a> ``</td>
+<td style="text-align:right">24076</td>
+<td style="text-align:right">4.75</td>
+<td style="text-align:right">5.03</td>
+<td style="text-align:right">5.36</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_56_1/">fastapi_0_56_1</a> ``</td>
+<td style="text-align:right">24284</td>
+<td style="text-align:right">4.71</td>
+<td style="text-align:right">4.98</td>
+<td style="text-align:right">5.31</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_56_0/">fastapi_0_56_0</a> ``</td>
+<td style="text-align:right">24293</td>
+<td style="text-align:right">4.73</td>
+<td style="text-align:right">4.97</td>
+<td style="text-align:right">5.32</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_55_1/">fastapi_0_55_1</a> ``</td>
+<td style="text-align:right">24096</td>
+<td style="text-align:right">4.75</td>
+<td style="text-align:right">5.01</td>
+<td style="text-align:right">5.36</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_55_0/">fastapi_0_55_0</a> ``</td>
+<td style="text-align:right">24052</td>
+<td style="text-align:right">4.76</td>
+<td style="text-align:right">5.03</td>
+<td style="text-align:right">5.37</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_54_2/">fastapi_0_54_2</a> ``</td>
+<td style="text-align:right">24081</td>
+<td style="text-align:right">4.77</td>
+<td style="text-align:right">5.05</td>
+<td style="text-align:right">5.37</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_54_1/">fastapi_0_54_1</a> ``</td>
+<td style="text-align:right">24356</td>
+<td style="text-align:right">4.70</td>
+<td style="text-align:right">4.97</td>
+<td style="text-align:right">5.29</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_54_0/">fastapi_0_54_0</a> ``</td>
+<td style="text-align:right">24055</td>
+<td style="text-align:right">4.75</td>
+<td style="text-align:right">5.06</td>
+<td style="text-align:right">5.36</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_53_2/">fastapi_0_53_2</a> ``</td>
+<td style="text-align:right">24193</td>
+<td style="text-align:right">4.72</td>
+<td style="text-align:right">5.01</td>
+<td style="text-align:right">5.33</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_53_1/">fastapi_0_53_1</a> ``</td>
+<td style="text-align:right">23774</td>
+<td style="text-align:right">4.88</td>
+<td style="text-align:right">5.07</td>
+<td style="text-align:right">5.42</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_53_0/">fastapi_0_53_0</a> ``</td>
+<td style="text-align:right">24640</td>
+<td style="text-align:right">4.65</td>
+<td style="text-align:right">4.87</td>
+<td style="text-align:right">5.24</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_52_0/">fastapi_0_52_0</a> ``</td>
+<td style="text-align:right">24092</td>
+<td style="text-align:right">4.77</td>
+<td style="text-align:right">5.02</td>
+<td style="text-align:right">5.36</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_51_0/">fastapi_0_51_0</a> ``</td>
+<td style="text-align:right">24111</td>
+<td style="text-align:right">4.77</td>
+<td style="text-align:right">5.04</td>
+<td style="text-align:right">5.36</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_117_1/">fastapi_0_117_1</a> ``</td>
+<td style="text-align:right">17876</td>
+<td style="text-align:right">6.43</td>
+<td style="text-align:right">6.74</td>
+<td style="text-align:right">7.26</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_117_0/">fastapi_0_117_0</a> ``</td>
+<td style="text-align:right">18049</td>
+<td style="text-align:right">6.37</td>
+<td style="text-align:right">6.67</td>
+<td style="text-align:right">7.19</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_116_2/">fastapi_0_116_2</a> ``</td>
+<td style="text-align:right">17711</td>
+<td style="text-align:right">6.50</td>
+<td style="text-align:right">6.81</td>
+<td style="text-align:right">7.32</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_116_1/">fastapi_0_116_1</a> ``</td>
+<td style="text-align:right">17708</td>
+<td style="text-align:right">6.52</td>
+<td style="text-align:right">6.80</td>
+<td style="text-align:right">7.31</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_116_0/">fastapi_0_116_0</a> ``</td>
+<td style="text-align:right">17987</td>
+<td style="text-align:right">6.38</td>
+<td style="text-align:right">6.75</td>
+<td style="text-align:right">7.19</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_9/">fastapi_0_115_9</a> ``</td>
+<td style="text-align:right">17597</td>
+<td style="text-align:right">6.56</td>
+<td style="text-align:right">6.88</td>
+<td style="text-align:right">7.35</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_8/">fastapi_0_115_8</a> ``</td>
+<td style="text-align:right">18064</td>
+<td style="text-align:right">6.36</td>
+<td style="text-align:right">6.61</td>
+<td style="text-align:right">7.12</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_7/">fastapi_0_115_7</a> ``</td>
+<td style="text-align:right">17594</td>
+<td style="text-align:right">6.54</td>
+<td style="text-align:right">6.90</td>
+<td style="text-align:right">7.38</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_6/">fastapi_0_115_6</a> ``</td>
+<td style="text-align:right">17748</td>
+<td style="text-align:right">6.46</td>
+<td style="text-align:right">6.95</td>
+<td style="text-align:right">7.30</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_5/">fastapi_0_115_5</a> ``</td>
+<td style="text-align:right">17893</td>
+<td style="text-align:right">6.45</td>
+<td style="text-align:right">6.77</td>
+<td style="text-align:right">7.24</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_4/">fastapi_0_115_4</a> ``</td>
+<td style="text-align:right">17991</td>
+<td style="text-align:right">6.42</td>
+<td style="text-align:right">6.65</td>
+<td style="text-align:right">7.19</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_3/">fastapi_0_115_3</a> ``</td>
+<td style="text-align:right">17772</td>
+<td style="text-align:right">6.40</td>
+<td style="text-align:right">6.78</td>
+<td style="text-align:right">7.27</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_2/">fastapi_0_115_2</a> ``</td>
+<td style="text-align:right">17895</td>
+<td style="text-align:right">6.47</td>
+<td style="text-align:right">6.71</td>
+<td style="text-align:right">7.23</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_14/">fastapi_0_115_14</a> ``</td>
+<td style="text-align:right">18091</td>
+<td style="text-align:right">6.36</td>
+<td style="text-align:right">6.61</td>
+<td style="text-align:right">7.16</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_13/">fastapi_0_115_13</a> ``</td>
+<td style="text-align:right">17966</td>
+<td style="text-align:right">6.38</td>
+<td style="text-align:right">6.79</td>
+<td style="text-align:right">7.21</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_12/">fastapi_0_115_12</a> ``</td>
+<td style="text-align:right">17765</td>
+<td style="text-align:right">6.49</td>
+<td style="text-align:right">6.76</td>
+<td style="text-align:right">7.28</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_11/">fastapi_0_115_11</a> ``</td>
+<td style="text-align:right">17743</td>
+<td style="text-align:right">6.49</td>
+<td style="text-align:right">6.83</td>
+<td style="text-align:right">7.30</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_10/">fastapi_0_115_10</a> ``</td>
+<td style="text-align:right">17793</td>
+<td style="text-align:right">6.42</td>
+<td style="text-align:right">6.72</td>
+<td style="text-align:right">7.29</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_1/">fastapi_0_115_1</a> ``</td>
+<td style="text-align:right">15730</td>
+<td style="text-align:right">7.32</td>
+<td style="text-align:right">7.76</td>
+<td style="text-align:right">8.25</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_0/">fastapi_0_115_0</a> ``</td>
+<td style="text-align:right">15804</td>
+<td style="text-align:right">7.27</td>
+<td style="text-align:right">7.63</td>
+<td style="text-align:right">8.21</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_114_2/">fastapi_0_114_2</a> ``</td>
+<td style="text-align:right">17034</td>
+<td style="text-align:right">6.69</td>
+<td style="text-align:right">7.11</td>
+<td style="text-align:right">7.61</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_114_1/">fastapi_0_114_1</a> ``</td>
+<td style="text-align:right">17239</td>
+<td style="text-align:right">6.62</td>
+<td style="text-align:right">7.04</td>
+<td style="text-align:right">7.53</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_114_0/">fastapi_0_114_0</a> ``</td>
+<td style="text-align:right">17027</td>
+<td style="text-align:right">6.78</td>
+<td style="text-align:right">7.12</td>
+<td style="text-align:right">7.62</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_113_0/">fastapi_0_113_0</a> ``</td>
+<td style="text-align:right">17049</td>
+<td style="text-align:right">6.78</td>
+<td style="text-align:right">7.00</td>
+<td style="text-align:right">7.59</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_4/">fastapi_0_112_4</a> ``</td>
+<td style="text-align:right">17091</td>
+<td style="text-align:right">6.70</td>
+<td style="text-align:right">7.08</td>
+<td style="text-align:right">7.59</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_3/">fastapi_0_112_3</a> ``</td>
+<td style="text-align:right">18054</td>
+<td style="text-align:right">6.34</td>
+<td style="text-align:right">6.73</td>
+<td style="text-align:right">7.18</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_2/">fastapi_0_112_2</a> ``</td>
+<td style="text-align:right">18209</td>
+<td style="text-align:right">6.28</td>
+<td style="text-align:right">6.69</td>
+<td style="text-align:right">7.11</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_1/">fastapi_0_112_1</a> ``</td>
+<td style="text-align:right">17854</td>
+<td style="text-align:right">6.49</td>
+<td style="text-align:right">6.75</td>
+<td style="text-align:right">7.27</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_0/">fastapi_0_112_0</a> ``</td>
+<td style="text-align:right">18028</td>
+<td style="text-align:right">6.37</td>
+<td style="text-align:right">6.74</td>
+<td style="text-align:right">7.19</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_111_1/">fastapi_0_111_1</a> ``</td>
+<td style="text-align:right">18038</td>
+<td style="text-align:right">6.36</td>
+<td style="text-align:right">6.68</td>
+<td style="text-align:right">7.18</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_111_0_dev1/">fastapi_0_111_0_dev1</a> ``</td>
+<td style="text-align:right">18034</td>
+<td style="text-align:right">6.36</td>
+<td style="text-align:right">6.75</td>
+<td style="text-align:right">7.18</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_111_0/">fastapi_0_111_0</a> ``</td>
+<td style="text-align:right">18121</td>
+<td style="text-align:right">6.34</td>
+<td style="text-align:right">6.67</td>
+<td style="text-align:right">7.15</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_3_dev2/">fastapi_0_110_3_dev2</a> ``</td>
+<td style="text-align:right">18195</td>
+<td style="text-align:right">6.33</td>
+<td style="text-align:right">6.61</td>
+<td style="text-align:right">7.13</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_3_dev1/">fastapi_0_110_3_dev1</a> ``</td>
+<td style="text-align:right">18203</td>
+<td style="text-align:right">6.29</td>
+<td style="text-align:right">6.63</td>
+<td style="text-align:right">7.11</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_3/">fastapi_0_110_3</a> ``</td>
+<td style="text-align:right">18246</td>
+<td style="text-align:right">6.31</td>
+<td style="text-align:right">6.59</td>
+<td style="text-align:right">7.09</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_2/">fastapi_0_110_2</a> ``</td>
+<td style="text-align:right">18055</td>
+<td style="text-align:right">6.35</td>
+<td style="text-align:right">6.76</td>
+<td style="text-align:right">7.17</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_1/">fastapi_0_110_1</a> ``</td>
+<td style="text-align:right">18066</td>
+<td style="text-align:right">6.32</td>
+<td style="text-align:right">6.75</td>
+<td style="text-align:right">7.18</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_0/">fastapi_0_110_0</a> ``</td>
+<td style="text-align:right">18155</td>
+<td style="text-align:right">6.34</td>
+<td style="text-align:right">6.62</td>
+<td style="text-align:right">7.13</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_109_2/">fastapi_0_109_2</a> ``</td>
+<td style="text-align:right">18308</td>
+<td style="text-align:right">6.29</td>
+<td style="text-align:right">6.64</td>
+<td style="text-align:right">7.07</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_109_1/">fastapi_0_109_1</a> ``</td>
+<td style="text-align:right">17994</td>
+<td style="text-align:right">6.36</td>
+<td style="text-align:right">6.85</td>
+<td style="text-align:right">7.12</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_109_0/">fastapi_0_109_0</a> ``</td>
+<td style="text-align:right">18129</td>
+<td style="text-align:right">6.34</td>
+<td style="text-align:right">6.62</td>
+<td style="text-align:right">7.15</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_108_0/">fastapi_0_108_0</a> ``</td>
+<td style="text-align:right">20509</td>
+<td style="text-align:right">5.57</td>
+<td style="text-align:right">5.99</td>
+<td style="text-align:right">6.31</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_107_0/">fastapi_0_107_0</a> ``</td>
+<td style="text-align:right">20783</td>
+<td style="text-align:right">5.54</td>
+<td style="text-align:right">5.80</td>
+<td style="text-align:right">6.22</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_106_0/">fastapi_0_106_0</a> ``</td>
+<td style="text-align:right">21445</td>
+<td style="text-align:right">5.33</td>
+<td style="text-align:right">5.67</td>
+<td style="text-align:right">6.02</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_105_0/">fastapi_0_105_0</a> ``</td>
+<td style="text-align:right">21600</td>
+<td style="text-align:right">5.31</td>
+<td style="text-align:right">5.59</td>
+<td style="text-align:right">5.98</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_104_1/">fastapi_0_104_1</a> ``</td>
+<td style="text-align:right">21549</td>
+<td style="text-align:right">5.31</td>
+<td style="text-align:right">5.66</td>
+<td style="text-align:right">6.01</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_104_0/">fastapi_0_104_0</a> ``</td>
+<td style="text-align:right">21715</td>
+<td style="text-align:right">5.30</td>
+<td style="text-align:right">5.55</td>
+<td style="text-align:right">5.96</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_103_2/">fastapi_0_103_2</a> ``</td>
+<td style="text-align:right">21495</td>
+<td style="text-align:right">5.33</td>
+<td style="text-align:right">5.63</td>
+<td style="text-align:right">6.02</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_103_1/">fastapi_0_103_1</a> ``</td>
+<td style="text-align:right">21467</td>
+<td style="text-align:right">5.34</td>
+<td style="text-align:right">5.64</td>
+<td style="text-align:right">6.02</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_103_0/">fastapi_0_103_0</a> ``</td>
+<td style="text-align:right">21587</td>
+<td style="text-align:right">5.28</td>
+<td style="text-align:right">5.61</td>
+<td style="text-align:right">5.98</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_102_0/">fastapi_0_102_0</a> ``</td>
+<td style="text-align:right">21613</td>
+<td style="text-align:right">5.32</td>
+<td style="text-align:right">5.60</td>
+<td style="text-align:right">5.97</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_101_1/">fastapi_0_101_1</a> ``</td>
+<td style="text-align:right">21306</td>
+<td style="text-align:right">5.35</td>
+<td style="text-align:right">5.71</td>
+<td style="text-align:right">6.07</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_101_0/">fastapi_0_101_0</a> ``</td>
+<td style="text-align:right">21572</td>
+<td style="text-align:right">5.27</td>
+<td style="text-align:right">5.68</td>
+<td style="text-align:right">6.00</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_100_1/">fastapi_0_100_1</a> ``</td>
+<td style="text-align:right">21347</td>
+<td style="text-align:right">5.38</td>
+<td style="text-align:right">5.64</td>
+<td style="text-align:right">6.05</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_100_0/">fastapi_0_100_0</a> ``</td>
+<td style="text-align:right">21643</td>
+<td style="text-align:right">5.30</td>
+<td style="text-align:right">5.58</td>
+<td style="text-align:right">5.97</td>
+</tr>
+</tbody>
+</table>
+<h2 id="parse-uploaded-file-store-it-on-disk-and-return-a-text-response--upload">Parse uploaded file, store it on disk and return a text response  {#upload}</h2>
+<p>The test simulates multipart formdata processing and work with files.</p>
+<p>Sorted by max req/s</p>
+<table>
+<thead>
+<tr>
+<th>Framework</th>
+<th style="text-align:right">Requests/sec</th>
+<th style="text-align:right">Latency 50% (ms)</th>
+<th style="text-align:right">Latency 75% (ms)</th>
+<th style="text-align:right">Latency Avg (ms)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_99_1/">fastapi_0_99_1</a> ``</td>
+<td style="text-align:right">7797</td>
+<td style="text-align:right">14.78</td>
+<td style="text-align:right">15.50</td>
+<td style="text-align:right">16.87</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_99_0/">fastapi_0_99_0</a> ``</td>
+<td style="text-align:right">7783</td>
+<td style="text-align:right">14.79</td>
+<td style="text-align:right">15.38</td>
+<td style="text-align:right">16.86</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_98_0/">fastapi_0_98_0</a> ``</td>
+<td style="text-align:right">7655</td>
+<td style="text-align:right">15.09</td>
+<td style="text-align:right">15.71</td>
+<td style="text-align:right">17.18</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_97_0/">fastapi_0_97_0</a> ``</td>
+<td style="text-align:right">7814</td>
+<td style="text-align:right">14.79</td>
+<td style="text-align:right">15.29</td>
+<td style="text-align:right">16.78</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_96_1/">fastapi_0_96_1</a> ``</td>
+<td style="text-align:right">7724</td>
+<td style="text-align:right">14.91</td>
+<td style="text-align:right">15.54</td>
+<td style="text-align:right">17.03</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_96_0/">fastapi_0_96_0</a> ``</td>
+<td style="text-align:right">7733</td>
+<td style="text-align:right">14.88</td>
+<td style="text-align:right">15.48</td>
+<td style="text-align:right">16.96</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_95_2/">fastapi_0_95_2</a> ``</td>
+<td style="text-align:right">7770</td>
+<td style="text-align:right">14.81</td>
+<td style="text-align:right">15.34</td>
+<td style="text-align:right">16.93</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_95_1/">fastapi_0_95_1</a> ``</td>
+<td style="text-align:right">7618</td>
+<td style="text-align:right">15.20</td>
+<td style="text-align:right">15.72</td>
+<td style="text-align:right">17.23</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_95_0/">fastapi_0_95_0</a> ``</td>
+<td style="text-align:right">7732</td>
+<td style="text-align:right">14.94</td>
+<td style="text-align:right">15.54</td>
+<td style="text-align:right">17.02</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_94_1/">fastapi_0_94_1</a> ``</td>
+<td style="text-align:right">7616</td>
+<td style="text-align:right">15.18</td>
+<td style="text-align:right">15.83</td>
+<td style="text-align:right">17.26</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_94_0/">fastapi_0_94_0</a> ``</td>
+<td style="text-align:right">7624</td>
+<td style="text-align:right">15.13</td>
+<td style="text-align:right">15.75</td>
+<td style="text-align:right">17.16</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_93_0/">fastapi_0_93_0</a> ``</td>
+<td style="text-align:right">7666</td>
+<td style="text-align:right">14.93</td>
+<td style="text-align:right">15.57</td>
+<td style="text-align:right">17.19</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_92_0/">fastapi_0_92_0</a> ``</td>
+<td style="text-align:right">7658</td>
+<td style="text-align:right">15.10</td>
+<td style="text-align:right">15.69</td>
+<td style="text-align:right">17.12</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_91_0/">fastapi_0_91_0</a> ``</td>
+<td style="text-align:right">7457</td>
+<td style="text-align:right">15.46</td>
+<td style="text-align:right">16.13</td>
+<td style="text-align:right">17.65</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_90_1/">fastapi_0_90_1</a> ``</td>
+<td style="text-align:right">7193</td>
+<td style="text-align:right">15.98</td>
+<td style="text-align:right">16.75</td>
+<td style="text-align:right">18.31</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_90_0/">fastapi_0_90_0</a> ``</td>
+<td style="text-align:right">7230</td>
+<td style="text-align:right">15.85</td>
+<td style="text-align:right">16.44</td>
+<td style="text-align:right">18.19</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_89_1/">fastapi_0_89_1</a> ``</td>
+<td style="text-align:right">7110</td>
+<td style="text-align:right">16.28</td>
+<td style="text-align:right">16.86</td>
+<td style="text-align:right">18.42</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_89_0/">fastapi_0_89_0</a> ``</td>
+<td style="text-align:right">7237</td>
+<td style="text-align:right">15.99</td>
+<td style="text-align:right">16.52</td>
+<td style="text-align:right">18.20</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_88_0/">fastapi_0_88_0</a> ``</td>
+<td style="text-align:right">7162</td>
+<td style="text-align:right">16.16</td>
+<td style="text-align:right">16.72</td>
+<td style="text-align:right">18.35</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_87_0/">fastapi_0_87_0</a> ``</td>
+<td style="text-align:right">7208</td>
+<td style="text-align:right">16.06</td>
+<td style="text-align:right">16.62</td>
+<td style="text-align:right">18.24</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_86_0/">fastapi_0_86_0</a> ``</td>
+<td style="text-align:right">7643</td>
+<td style="text-align:right">15.09</td>
+<td style="text-align:right">15.72</td>
+<td style="text-align:right">17.30</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_85_2/">fastapi_0_85_2</a> ``</td>
+<td style="text-align:right">7622</td>
+<td style="text-align:right">15.15</td>
+<td style="text-align:right">15.76</td>
+<td style="text-align:right">17.24</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_85_1/">fastapi_0_85_1</a> ``</td>
+<td style="text-align:right">7660</td>
+<td style="text-align:right">15.01</td>
+<td style="text-align:right">15.60</td>
+<td style="text-align:right">17.18</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_85_0/">fastapi_0_85_0</a> ``</td>
+<td style="text-align:right">7570</td>
+<td style="text-align:right">15.27</td>
+<td style="text-align:right">15.91</td>
+<td style="text-align:right">17.41</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_84_0/">fastapi_0_84_0</a> ``</td>
+<td style="text-align:right">7762</td>
+<td style="text-align:right">14.89</td>
+<td style="text-align:right">15.32</td>
+<td style="text-align:right">16.96</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_83_0/">fastapi_0_83_0</a> ``</td>
+<td style="text-align:right">7768</td>
+<td style="text-align:right">14.83</td>
+<td style="text-align:right">15.36</td>
+<td style="text-align:right">16.97</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_82_0/">fastapi_0_82_0</a> ``</td>
+<td style="text-align:right">7674</td>
+<td style="text-align:right">15.04</td>
+<td style="text-align:right">15.62</td>
+<td style="text-align:right">17.13</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_81_0/">fastapi_0_81_0</a> ``</td>
+<td style="text-align:right">7661</td>
+<td style="text-align:right">15.05</td>
+<td style="text-align:right">15.67</td>
+<td style="text-align:right">17.20</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_80_0/">fastapi_0_80_0</a> ``</td>
+<td style="text-align:right">7618</td>
+<td style="text-align:right">15.15</td>
+<td style="text-align:right">15.65</td>
+<td style="text-align:right">17.26</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_79_1/">fastapi_0_79_1</a> ``</td>
+<td style="text-align:right">7609</td>
+<td style="text-align:right">15.18</td>
+<td style="text-align:right">15.84</td>
+<td style="text-align:right">17.30</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_79_0/">fastapi_0_79_0</a> ``</td>
+<td style="text-align:right">7645</td>
+<td style="text-align:right">15.00</td>
+<td style="text-align:right">15.66</td>
+<td style="text-align:right">17.26</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_78_0/">fastapi_0_78_0</a> ``</td>
+<td style="text-align:right">7648</td>
+<td style="text-align:right">15.18</td>
+<td style="text-align:right">15.64</td>
+<td style="text-align:right">17.19</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_77_1/">fastapi_0_77_1</a> ``</td>
+<td style="text-align:right">7728</td>
+<td style="text-align:right">14.94</td>
+<td style="text-align:right">15.39</td>
+<td style="text-align:right">16.99</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_77_0/">fastapi_0_77_0</a> ``</td>
+<td style="text-align:right">7723</td>
+<td style="text-align:right">14.97</td>
+<td style="text-align:right">15.55</td>
+<td style="text-align:right">17.03</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_76_0/">fastapi_0_76_0</a> ``</td>
+<td style="text-align:right">7614</td>
+<td style="text-align:right">15.22</td>
+<td style="text-align:right">15.71</td>
+<td style="text-align:right">17.27</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_75_2/">fastapi_0_75_2</a> ``</td>
+<td style="text-align:right">7799</td>
+<td style="text-align:right">14.86</td>
+<td style="text-align:right">15.27</td>
+<td style="text-align:right">16.85</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_75_1/">fastapi_0_75_1</a> ``</td>
+<td style="text-align:right">7702</td>
+<td style="text-align:right">15.08</td>
+<td style="text-align:right">15.59</td>
+<td style="text-align:right">17.08</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_75_0/">fastapi_0_75_0</a> ``</td>
+<td style="text-align:right">7811</td>
+<td style="text-align:right">14.83</td>
+<td style="text-align:right">15.24</td>
+<td style="text-align:right">16.78</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_74_1/">fastapi_0_74_1</a> ``</td>
+<td style="text-align:right">7647</td>
+<td style="text-align:right">15.12</td>
+<td style="text-align:right">15.69</td>
+<td style="text-align:right">17.23</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_74_0/">fastapi_0_74_0</a> ``</td>
+<td style="text-align:right">7905</td>
+<td style="text-align:right">14.60</td>
+<td style="text-align:right">15.09</td>
+<td style="text-align:right">16.61</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_73_0/">fastapi_0_73_0</a> ``</td>
+<td style="text-align:right">7885</td>
+<td style="text-align:right">14.69</td>
+<td style="text-align:right">15.17</td>
+<td style="text-align:right">16.69</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_72_0/">fastapi_0_72_0</a> ``</td>
+<td style="text-align:right">7834</td>
+<td style="text-align:right">14.78</td>
+<td style="text-align:right">15.26</td>
+<td style="text-align:right">16.74</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_71_0/">fastapi_0_71_0</a> ``</td>
+<td style="text-align:right">7787</td>
+<td style="text-align:right">14.90</td>
+<td style="text-align:right">15.46</td>
+<td style="text-align:right">16.88</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_70_1/">fastapi_0_70_1</a> ``</td>
+<td style="text-align:right">7812</td>
+<td style="text-align:right">14.86</td>
+<td style="text-align:right">15.26</td>
+<td style="text-align:right">16.87</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_70_0/">fastapi_0_70_0</a> ``</td>
+<td style="text-align:right">7681</td>
+<td style="text-align:right">15.14</td>
+<td style="text-align:right">15.67</td>
+<td style="text-align:right">17.14</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_69_0/">fastapi_0_69_0</a> ``</td>
+<td style="text-align:right">7820</td>
+<td style="text-align:right">14.81</td>
+<td style="text-align:right">15.24</td>
+<td style="text-align:right">16.84</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_68_2/">fastapi_0_68_2</a> ``</td>
+<td style="text-align:right">7766</td>
+<td style="text-align:right">14.91</td>
+<td style="text-align:right">15.35</td>
+<td style="text-align:right">16.87</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_68_1/">fastapi_0_68_1</a> ``</td>
+<td style="text-align:right">7847</td>
+<td style="text-align:right">14.74</td>
+<td style="text-align:right">15.16</td>
+<td style="text-align:right">16.75</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_68_0/">fastapi_0_68_0</a> ``</td>
+<td style="text-align:right">7729</td>
+<td style="text-align:right">14.87</td>
+<td style="text-align:right">15.53</td>
+<td style="text-align:right">17.01</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_67_0/">fastapi_0_67_0</a> ``</td>
+<td style="text-align:right">7776</td>
+<td style="text-align:right">14.84</td>
+<td style="text-align:right">15.39</td>
+<td style="text-align:right">16.89</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_66_1/">fastapi_0_66_1</a> ``</td>
+<td style="text-align:right">7771</td>
+<td style="text-align:right">14.83</td>
+<td style="text-align:right">15.31</td>
+<td style="text-align:right">16.95</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_66_0/">fastapi_0_66_0</a> ``</td>
+<td style="text-align:right">7685</td>
+<td style="text-align:right">15.03</td>
+<td style="text-align:right">15.55</td>
+<td style="text-align:right">17.08</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_65_3/">fastapi_0_65_3</a> ``</td>
+<td style="text-align:right">7738</td>
+<td style="text-align:right">14.91</td>
+<td style="text-align:right">15.44</td>
+<td style="text-align:right">16.95</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_65_2/">fastapi_0_65_2</a> ``</td>
+<td style="text-align:right">7827</td>
+<td style="text-align:right">14.80</td>
+<td style="text-align:right">15.19</td>
+<td style="text-align:right">16.78</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_65_1/">fastapi_0_65_1</a> ``</td>
+<td style="text-align:right">7746</td>
+<td style="text-align:right">14.98</td>
+<td style="text-align:right">15.49</td>
+<td style="text-align:right">16.95</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_65_0/">fastapi_0_65_0</a> ``</td>
+<td style="text-align:right">7733</td>
+<td style="text-align:right">15.01</td>
+<td style="text-align:right">15.49</td>
+<td style="text-align:right">16.99</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_64_0/">fastapi_0_64_0</a> ``</td>
+<td style="text-align:right">7680</td>
+<td style="text-align:right">15.08</td>
+<td style="text-align:right">15.64</td>
+<td style="text-align:right">17.11</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_63_0/">fastapi_0_63_0</a> ``</td>
+<td style="text-align:right">7682</td>
+<td style="text-align:right">15.07</td>
+<td style="text-align:right">15.61</td>
+<td style="text-align:right">17.06</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_62_0/">fastapi_0_62_0</a> ``</td>
+<td style="text-align:right">7753</td>
+<td style="text-align:right">14.95</td>
+<td style="text-align:right">15.48</td>
+<td style="text-align:right">16.95</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_61_2/">fastapi_0_61_2</a> ``</td>
+<td style="text-align:right">7673</td>
+<td style="text-align:right">15.03</td>
+<td style="text-align:right">15.62</td>
+<td style="text-align:right">17.16</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_61_1/">fastapi_0_61_1</a> ``</td>
+<td style="text-align:right">7646</td>
+<td style="text-align:right">15.07</td>
+<td style="text-align:right">15.74</td>
+<td style="text-align:right">17.21</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_61_0/">fastapi_0_61_0</a> ``</td>
+<td style="text-align:right">7591</td>
+<td style="text-align:right">15.25</td>
+<td style="text-align:right">15.79</td>
+<td style="text-align:right">17.26</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_60_2/">fastapi_0_60_2</a> ``</td>
+<td style="text-align:right">7642</td>
+<td style="text-align:right">15.08</td>
+<td style="text-align:right">15.64</td>
+<td style="text-align:right">17.24</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_60_1/">fastapi_0_60_1</a> ``</td>
+<td style="text-align:right">7598</td>
+<td style="text-align:right">15.18</td>
+<td style="text-align:right">15.81</td>
+<td style="text-align:right">17.29</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_60_0/">fastapi_0_60_0</a> ``</td>
+<td style="text-align:right">5702</td>
+<td style="text-align:right">21.82</td>
+<td style="text-align:right">23.46</td>
+<td style="text-align:right">22.46</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_59_0/">fastapi_0_59_0</a> ``</td>
+<td style="text-align:right">5637</td>
+<td style="text-align:right">22.00</td>
+<td style="text-align:right">23.60</td>
+<td style="text-align:right">22.72</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_58_1/">fastapi_0_58_1</a> ``</td>
+<td style="text-align:right">5729</td>
+<td style="text-align:right">21.71</td>
+<td style="text-align:right">23.31</td>
+<td style="text-align:right">22.36</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_58_0/">fastapi_0_58_0</a> ``</td>
+<td style="text-align:right">5659</td>
+<td style="text-align:right">21.92</td>
+<td style="text-align:right">23.51</td>
+<td style="text-align:right">22.63</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_57_0/">fastapi_0_57_0</a> ``</td>
+<td style="text-align:right">5649</td>
+<td style="text-align:right">22.02</td>
+<td style="text-align:right">23.68</td>
+<td style="text-align:right">22.67</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_56_1/">fastapi_0_56_1</a> ``</td>
+<td style="text-align:right">5680</td>
+<td style="text-align:right">21.88</td>
+<td style="text-align:right">23.48</td>
+<td style="text-align:right">22.55</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_56_0/">fastapi_0_56_0</a> ``</td>
+<td style="text-align:right">5624</td>
+<td style="text-align:right">22.09</td>
+<td style="text-align:right">23.72</td>
+<td style="text-align:right">22.76</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_55_1/">fastapi_0_55_1</a> ``</td>
+<td style="text-align:right">5726</td>
+<td style="text-align:right">21.65</td>
+<td style="text-align:right">23.27</td>
+<td style="text-align:right">22.38</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_55_0/">fastapi_0_55_0</a> ``</td>
+<td style="text-align:right">5644</td>
+<td style="text-align:right">22.05</td>
+<td style="text-align:right">23.72</td>
+<td style="text-align:right">22.68</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_54_2/">fastapi_0_54_2</a> ``</td>
+<td style="text-align:right">5686</td>
+<td style="text-align:right">21.83</td>
+<td style="text-align:right">23.47</td>
+<td style="text-align:right">22.53</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_54_1/">fastapi_0_54_1</a> ``</td>
+<td style="text-align:right">5714</td>
+<td style="text-align:right">21.76</td>
+<td style="text-align:right">23.36</td>
+<td style="text-align:right">22.42</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_54_0/">fastapi_0_54_0</a> ``</td>
+<td style="text-align:right">5688</td>
+<td style="text-align:right">21.87</td>
+<td style="text-align:right">23.51</td>
+<td style="text-align:right">22.52</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_53_2/">fastapi_0_53_2</a> ``</td>
+<td style="text-align:right">5574</td>
+<td style="text-align:right">22.27</td>
+<td style="text-align:right">23.87</td>
+<td style="text-align:right">22.99</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_53_1/">fastapi_0_53_1</a> ``</td>
+<td style="text-align:right">5621</td>
+<td style="text-align:right">22.16</td>
+<td style="text-align:right">23.76</td>
+<td style="text-align:right">22.78</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_53_0/">fastapi_0_53_0</a> ``</td>
+<td style="text-align:right">5697</td>
+<td style="text-align:right">21.81</td>
+<td style="text-align:right">23.51</td>
+<td style="text-align:right">22.48</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_52_0/">fastapi_0_52_0</a> ``</td>
+<td style="text-align:right">5631</td>
+<td style="text-align:right">22.06</td>
+<td style="text-align:right">23.66</td>
+<td style="text-align:right">22.75</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_51_0/">fastapi_0_51_0</a> ``</td>
+<td style="text-align:right">5613</td>
+<td style="text-align:right">22.21</td>
+<td style="text-align:right">23.85</td>
+<td style="text-align:right">22.82</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_117_1/">fastapi_0_117_1</a> ``</td>
+<td style="text-align:right">7217</td>
+<td style="text-align:right">15.95</td>
+<td style="text-align:right">16.54</td>
+<td style="text-align:right">18.21</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_117_0/">fastapi_0_117_0</a> ``</td>
+<td style="text-align:right">7123</td>
+<td style="text-align:right">16.29</td>
+<td style="text-align:right">16.89</td>
+<td style="text-align:right">18.49</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_116_2/">fastapi_0_116_2</a> ``</td>
+<td style="text-align:right">7197</td>
+<td style="text-align:right">16.11</td>
+<td style="text-align:right">16.66</td>
+<td style="text-align:right">18.28</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_116_1/">fastapi_0_116_1</a> ``</td>
+<td style="text-align:right">7127</td>
+<td style="text-align:right">16.16</td>
+<td style="text-align:right">16.75</td>
+<td style="text-align:right">18.46</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_116_0/">fastapi_0_116_0</a> ``</td>
+<td style="text-align:right">7184</td>
+<td style="text-align:right">16.11</td>
+<td style="text-align:right">16.63</td>
+<td style="text-align:right">18.35</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_9/">fastapi_0_115_9</a> ``</td>
+<td style="text-align:right">7142</td>
+<td style="text-align:right">16.19</td>
+<td style="text-align:right">16.68</td>
+<td style="text-align:right">18.45</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_8/">fastapi_0_115_8</a> ``</td>
+<td style="text-align:right">7217</td>
+<td style="text-align:right">16.05</td>
+<td style="text-align:right">16.50</td>
+<td style="text-align:right">18.27</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_7/">fastapi_0_115_7</a> ``</td>
+<td style="text-align:right">7176</td>
+<td style="text-align:right">16.16</td>
+<td style="text-align:right">16.71</td>
+<td style="text-align:right">18.31</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_6/">fastapi_0_115_6</a> ``</td>
+<td style="text-align:right">7187</td>
+<td style="text-align:right">16.09</td>
+<td style="text-align:right">16.64</td>
+<td style="text-align:right">18.34</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_5/">fastapi_0_115_5</a> ``</td>
+<td style="text-align:right">7090</td>
+<td style="text-align:right">16.35</td>
+<td style="text-align:right">16.94</td>
+<td style="text-align:right">18.59</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_4/">fastapi_0_115_4</a> ``</td>
+<td style="text-align:right">7166</td>
+<td style="text-align:right">16.03</td>
+<td style="text-align:right">16.81</td>
+<td style="text-align:right">18.41</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_3/">fastapi_0_115_3</a> ``</td>
+<td style="text-align:right">7137</td>
+<td style="text-align:right">16.16</td>
+<td style="text-align:right">16.78</td>
+<td style="text-align:right">18.52</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_2/">fastapi_0_115_2</a> ``</td>
+<td style="text-align:right">7101</td>
+<td style="text-align:right">16.09</td>
+<td style="text-align:right">16.85</td>
+<td style="text-align:right">18.54</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_14/">fastapi_0_115_14</a> ``</td>
+<td style="text-align:right">7120</td>
+<td style="text-align:right">16.22</td>
+<td style="text-align:right">16.72</td>
+<td style="text-align:right">18.46</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_13/">fastapi_0_115_13</a> ``</td>
+<td style="text-align:right">7199</td>
+<td style="text-align:right">15.94</td>
+<td style="text-align:right">16.58</td>
+<td style="text-align:right">18.31</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_12/">fastapi_0_115_12</a> ``</td>
+<td style="text-align:right">7152</td>
+<td style="text-align:right">16.10</td>
+<td style="text-align:right">16.64</td>
+<td style="text-align:right">18.41</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_11/">fastapi_0_115_11</a> ``</td>
+<td style="text-align:right">7084</td>
+<td style="text-align:right">16.28</td>
+<td style="text-align:right">16.96</td>
+<td style="text-align:right">18.55</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_10/">fastapi_0_115_10</a> ``</td>
+<td style="text-align:right">7089</td>
+<td style="text-align:right">16.26</td>
+<td style="text-align:right">16.84</td>
+<td style="text-align:right">18.62</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_1/">fastapi_0_115_1</a> ``</td>
+<td style="text-align:right">6742</td>
+<td style="text-align:right">17.15</td>
+<td style="text-align:right">17.86</td>
+<td style="text-align:right">19.57</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_0/">fastapi_0_115_0</a> ``</td>
+<td style="text-align:right">6739</td>
+<td style="text-align:right">17.17</td>
+<td style="text-align:right">17.71</td>
+<td style="text-align:right">19.57</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_114_2/">fastapi_0_114_2</a> ``</td>
+<td style="text-align:right">6763</td>
+<td style="text-align:right">17.08</td>
+<td style="text-align:right">17.86</td>
+<td style="text-align:right">19.49</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_114_1/">fastapi_0_114_1</a> ``</td>
+<td style="text-align:right">6806</td>
+<td style="text-align:right">16.95</td>
+<td style="text-align:right">17.54</td>
+<td style="text-align:right">19.35</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_114_0/">fastapi_0_114_0</a> ``</td>
+<td style="text-align:right">6745</td>
+<td style="text-align:right">17.10</td>
+<td style="text-align:right">17.76</td>
+<td style="text-align:right">19.55</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_113_0/">fastapi_0_113_0</a> ``</td>
+<td style="text-align:right">6726</td>
+<td style="text-align:right">17.16</td>
+<td style="text-align:right">17.86</td>
+<td style="text-align:right">19.59</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_4/">fastapi_0_112_4</a> ``</td>
+<td style="text-align:right">6727</td>
+<td style="text-align:right">17.18</td>
+<td style="text-align:right">17.77</td>
+<td style="text-align:right">19.59</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_3/">fastapi_0_112_3</a> ``</td>
+<td style="text-align:right">6770</td>
+<td style="text-align:right">17.07</td>
+<td style="text-align:right">17.79</td>
+<td style="text-align:right">19.49</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_2/">fastapi_0_112_2</a> ``</td>
+<td style="text-align:right">6748</td>
+<td style="text-align:right">17.11</td>
+<td style="text-align:right">17.75</td>
+<td style="text-align:right">19.54</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_1/">fastapi_0_112_1</a> ``</td>
+<td style="text-align:right">6749</td>
+<td style="text-align:right">17.07</td>
+<td style="text-align:right">17.69</td>
+<td style="text-align:right">19.57</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_0/">fastapi_0_112_0</a> ``</td>
+<td style="text-align:right">6744</td>
+<td style="text-align:right">17.15</td>
+<td style="text-align:right">17.73</td>
+<td style="text-align:right">19.57</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_111_1/">fastapi_0_111_1</a> ``</td>
+<td style="text-align:right">6754</td>
+<td style="text-align:right">17.08</td>
+<td style="text-align:right">17.60</td>
+<td style="text-align:right">19.56</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_111_0_dev1/">fastapi_0_111_0_dev1</a> ``</td>
+<td style="text-align:right">6667</td>
+<td style="text-align:right">17.32</td>
+<td style="text-align:right">17.96</td>
+<td style="text-align:right">19.80</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_111_0/">fastapi_0_111_0</a> ``</td>
+<td style="text-align:right">6685</td>
+<td style="text-align:right">17.30</td>
+<td style="text-align:right">17.97</td>
+<td style="text-align:right">19.82</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_3_dev2/">fastapi_0_110_3_dev2</a> ``</td>
+<td style="text-align:right">6641</td>
+<td style="text-align:right">17.42</td>
+<td style="text-align:right">18.04</td>
+<td style="text-align:right">19.87</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_3_dev1/">fastapi_0_110_3_dev1</a> ``</td>
+<td style="text-align:right">6742</td>
+<td style="text-align:right">17.14</td>
+<td style="text-align:right">17.73</td>
+<td style="text-align:right">19.54</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_3/">fastapi_0_110_3</a> ``</td>
+<td style="text-align:right">6693</td>
+<td style="text-align:right">17.25</td>
+<td style="text-align:right">17.95</td>
+<td style="text-align:right">19.75</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_2/">fastapi_0_110_2</a> ``</td>
+<td style="text-align:right">6735</td>
+<td style="text-align:right">17.13</td>
+<td style="text-align:right">17.89</td>
+<td style="text-align:right">19.57</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_1/">fastapi_0_110_1</a> ``</td>
+<td style="text-align:right">6686</td>
+<td style="text-align:right">17.33</td>
+<td style="text-align:right">17.97</td>
+<td style="text-align:right">19.69</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_0/">fastapi_0_110_0</a> ``</td>
+<td style="text-align:right">6745</td>
+<td style="text-align:right">17.09</td>
+<td style="text-align:right">17.83</td>
+<td style="text-align:right">19.51</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_109_2/">fastapi_0_109_2</a> ``</td>
+<td style="text-align:right">6757</td>
+<td style="text-align:right">17.05</td>
+<td style="text-align:right">17.68</td>
+<td style="text-align:right">19.50</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_109_1/">fastapi_0_109_1</a> ``</td>
+<td style="text-align:right">6661</td>
+<td style="text-align:right">17.35</td>
+<td style="text-align:right">17.97</td>
+<td style="text-align:right">19.83</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_109_0/">fastapi_0_109_0</a> ``</td>
+<td style="text-align:right">6761</td>
+<td style="text-align:right">17.13</td>
+<td style="text-align:right">17.63</td>
+<td style="text-align:right">19.47</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_108_0/">fastapi_0_108_0</a> ``</td>
+<td style="text-align:right">7006</td>
+<td style="text-align:right">16.50</td>
+<td style="text-align:right">17.10</td>
+<td style="text-align:right">18.77</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_107_0/">fastapi_0_107_0</a> ``</td>
+<td style="text-align:right">6969</td>
+<td style="text-align:right">16.57</td>
+<td style="text-align:right">17.17</td>
+<td style="text-align:right">18.95</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_106_0/">fastapi_0_106_0</a> ``</td>
+<td style="text-align:right">7061</td>
+<td style="text-align:right">16.30</td>
+<td style="text-align:right">17.04</td>
+<td style="text-align:right">18.65</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_105_0/">fastapi_0_105_0</a> ``</td>
+<td style="text-align:right">7189</td>
+<td style="text-align:right">16.09</td>
+<td style="text-align:right">16.59</td>
+<td style="text-align:right">18.33</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_104_1/">fastapi_0_104_1</a> ``</td>
+<td style="text-align:right">7190</td>
+<td style="text-align:right">16.12</td>
+<td style="text-align:right">16.62</td>
+<td style="text-align:right">18.28</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_104_0/">fastapi_0_104_0</a> ``</td>
+<td style="text-align:right">7110</td>
+<td style="text-align:right">16.27</td>
+<td style="text-align:right">16.85</td>
+<td style="text-align:right">18.55</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_103_2/">fastapi_0_103_2</a> ``</td>
+<td style="text-align:right">7115</td>
+<td style="text-align:right">16.24</td>
+<td style="text-align:right">16.83</td>
+<td style="text-align:right">18.49</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_103_1/">fastapi_0_103_1</a> ``</td>
+<td style="text-align:right">7139</td>
+<td style="text-align:right">16.11</td>
+<td style="text-align:right">16.67</td>
+<td style="text-align:right">18.49</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_103_0/">fastapi_0_103_0</a> ``</td>
+<td style="text-align:right">7142</td>
+<td style="text-align:right">16.21</td>
+<td style="text-align:right">16.77</td>
+<td style="text-align:right">18.33</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_102_0/">fastapi_0_102_0</a> ``</td>
+<td style="text-align:right">7078</td>
+<td style="text-align:right">16.32</td>
+<td style="text-align:right">16.97</td>
+<td style="text-align:right">18.64</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_101_1/">fastapi_0_101_1</a> ``</td>
+<td style="text-align:right">7122</td>
+<td style="text-align:right">16.24</td>
+<td style="text-align:right">16.80</td>
+<td style="text-align:right">18.48</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_101_0/">fastapi_0_101_0</a> ``</td>
+<td style="text-align:right">7073</td>
+<td style="text-align:right">16.31</td>
+<td style="text-align:right">17.02</td>
+<td style="text-align:right">18.59</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_100_1/">fastapi_0_100_1</a> ``</td>
+<td style="text-align:right">7087</td>
+<td style="text-align:right">16.31</td>
+<td style="text-align:right">16.87</td>
+<td style="text-align:right">18.53</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_100_0/">fastapi_0_100_0</a> ``</td>
+<td style="text-align:right">7103</td>
+<td style="text-align:right">16.28</td>
+<td style="text-align:right">16.81</td>
+<td style="text-align:right">18.57</td>
+</tr>
+</tbody>
+</table>
+<h2 id="composite-stats-composite">Composite stats {#composite}</h2>
+<p>Combined benchmarks results</p>
+<p>Sorted by completed requests</p>
+<table>
+<thead>
+<tr>
+<th>Framework</th>
+<th style="text-align:right">Requests completed</th>
+<th style="text-align:right">Avg Latency 50% (ms)</th>
+<th style="text-align:right">Avg Latency 75% (ms)</th>
+<th style="text-align:right">Avg Latency (ms)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_99_1/">fastapi_0_99_1</a> ``</td>
+<td style="text-align:right">961575</td>
+<td style="text-align:right">7.69</td>
+<td style="text-align:right">8.18</td>
+<td style="text-align:right">9.94</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_99_0/">fastapi_0_99_0</a> ``</td>
+<td style="text-align:right">978105</td>
+<td style="text-align:right">7.69</td>
+<td style="text-align:right">8.11</td>
+<td style="text-align:right">8.76</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_98_0/">fastapi_0_98_0</a> ``</td>
+<td style="text-align:right">964545</td>
+<td style="text-align:right">7.83</td>
+<td style="text-align:right">8.26</td>
+<td style="text-align:right">8.91</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_97_0/">fastapi_0_97_0</a> ``</td>
+<td style="text-align:right">979965</td>
+<td style="text-align:right">7.67</td>
+<td style="text-align:right">8.05</td>
+<td style="text-align:right">8.73</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_96_1/">fastapi_0_96_1</a> ``</td>
+<td style="text-align:right">973845</td>
+<td style="text-align:right">7.74</td>
+<td style="text-align:right">8.17</td>
+<td style="text-align:right">9.58</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_96_0/">fastapi_0_96_0</a> ``</td>
+<td style="text-align:right">960930</td>
+<td style="text-align:right">7.8</td>
+<td style="text-align:right">8.14</td>
+<td style="text-align:right">8.85</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_95_2/">fastapi_0_95_2</a> ``</td>
+<td style="text-align:right">976860</td>
+<td style="text-align:right">7.7</td>
+<td style="text-align:right">8.07</td>
+<td style="text-align:right">8.78</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_95_1/">fastapi_0_95_1</a> ``</td>
+<td style="text-align:right">967260</td>
+<td style="text-align:right">7.86</td>
+<td style="text-align:right">8.22</td>
+<td style="text-align:right">8.92</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_95_0/">fastapi_0_95_0</a> ``</td>
+<td style="text-align:right">976485</td>
+<td style="text-align:right">7.74</td>
+<td style="text-align:right">8.13</td>
+<td style="text-align:right">8.81</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_94_1/">fastapi_0_94_1</a> ``</td>
+<td style="text-align:right">965070</td>
+<td style="text-align:right">7.86</td>
+<td style="text-align:right">8.26</td>
+<td style="text-align:right">8.93</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_94_0/">fastapi_0_94_0</a> ``</td>
+<td style="text-align:right">966510</td>
+<td style="text-align:right">7.84</td>
+<td style="text-align:right">8.25</td>
+<td style="text-align:right">8.92</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_93_0/">fastapi_0_93_0</a> ``</td>
+<td style="text-align:right">961380</td>
+<td style="text-align:right">7.81</td>
+<td style="text-align:right">8.18</td>
+<td style="text-align:right">8.92</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_92_0/">fastapi_0_92_0</a> ``</td>
+<td style="text-align:right">976470</td>
+<td style="text-align:right">7.8</td>
+<td style="text-align:right">8.17</td>
+<td style="text-align:right">8.83</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_91_0/">fastapi_0_91_0</a> ``</td>
+<td style="text-align:right">975285</td>
+<td style="text-align:right">7.91</td>
+<td style="text-align:right">8.32</td>
+<td style="text-align:right">9.01</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_90_1/">fastapi_0_90_1</a> ``</td>
+<td style="text-align:right">965385</td>
+<td style="text-align:right">8.12</td>
+<td style="text-align:right">8.53</td>
+<td style="text-align:right">9.25</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_90_0/">fastapi_0_90_0</a> ``</td>
+<td style="text-align:right">966435</td>
+<td style="text-align:right">8.07</td>
+<td style="text-align:right">8.42</td>
+<td style="text-align:right">9.21</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_89_1/">fastapi_0_89_1</a> ``</td>
+<td style="text-align:right">959625</td>
+<td style="text-align:right">8.22</td>
+<td style="text-align:right">8.6</td>
+<td style="text-align:right">9.3</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_89_0/">fastapi_0_89_0</a> ``</td>
+<td style="text-align:right">981825</td>
+<td style="text-align:right">8.06</td>
+<td style="text-align:right">8.41</td>
+<td style="text-align:right">9.18</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_88_0/">fastapi_0_88_0</a> ``</td>
+<td style="text-align:right">964080</td>
+<td style="text-align:right">8.17</td>
+<td style="text-align:right">8.53</td>
+<td style="text-align:right">9.29</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_87_0/">fastapi_0_87_0</a> ``</td>
+<td style="text-align:right">964095</td>
+<td style="text-align:right">8.15</td>
+<td style="text-align:right">8.52</td>
+<td style="text-align:right">9.23</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_86_0/">fastapi_0_86_0</a> ``</td>
+<td style="text-align:right">963045</td>
+<td style="text-align:right">7.82</td>
+<td style="text-align:right">8.22</td>
+<td style="text-align:right">9.84</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_85_2/">fastapi_0_85_2</a> ``</td>
+<td style="text-align:right">964695</td>
+<td style="text-align:right">7.87</td>
+<td style="text-align:right">8.27</td>
+<td style="text-align:right">8.94</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_85_1/">fastapi_0_85_1</a> ``</td>
+<td style="text-align:right">964935</td>
+<td style="text-align:right">7.84</td>
+<td style="text-align:right">8.17</td>
+<td style="text-align:right">9.57</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_85_0/">fastapi_0_85_0</a> ``</td>
+<td style="text-align:right">980100</td>
+<td style="text-align:right">7.85</td>
+<td style="text-align:right">8.25</td>
+<td style="text-align:right">8.93</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_84_0/">fastapi_0_84_0</a> ``</td>
+<td style="text-align:right">976740</td>
+<td style="text-align:right">7.73</td>
+<td style="text-align:right">8.07</td>
+<td style="text-align:right">8.81</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_83_0/">fastapi_0_83_0</a> ``</td>
+<td style="text-align:right">978045</td>
+<td style="text-align:right">7.7</td>
+<td style="text-align:right">8.12</td>
+<td style="text-align:right">8.78</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_82_0/">fastapi_0_82_0</a> ``</td>
+<td style="text-align:right">971430</td>
+<td style="text-align:right">7.79</td>
+<td style="text-align:right">8.19</td>
+<td style="text-align:right">8.86</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_81_0/">fastapi_0_81_0</a> ``</td>
+<td style="text-align:right">978195</td>
+<td style="text-align:right">7.78</td>
+<td style="text-align:right">8.18</td>
+<td style="text-align:right">8.86</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_80_0/">fastapi_0_80_0</a> ``</td>
+<td style="text-align:right">975675</td>
+<td style="text-align:right">7.82</td>
+<td style="text-align:right">8.12</td>
+<td style="text-align:right">8.87</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_79_1/">fastapi_0_79_1</a> ``</td>
+<td style="text-align:right">969420</td>
+<td style="text-align:right">7.85</td>
+<td style="text-align:right">8.28</td>
+<td style="text-align:right">8.94</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_79_0/">fastapi_0_79_0</a> ``</td>
+<td style="text-align:right">972645</td>
+<td style="text-align:right">7.77</td>
+<td style="text-align:right">8.22</td>
+<td style="text-align:right">8.9</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_78_0/">fastapi_0_78_0</a> ``</td>
+<td style="text-align:right">972600</td>
+<td style="text-align:right">7.85</td>
+<td style="text-align:right">8.14</td>
+<td style="text-align:right">8.87</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_77_1/">fastapi_0_77_1</a> ``</td>
+<td style="text-align:right">992430</td>
+<td style="text-align:right">7.73</td>
+<td style="text-align:right">7.97</td>
+<td style="text-align:right">8.74</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_77_0/">fastapi_0_77_0</a> ``</td>
+<td style="text-align:right">998160</td>
+<td style="text-align:right">7.73</td>
+<td style="text-align:right">8.0</td>
+<td style="text-align:right">8.73</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_76_0/">fastapi_0_76_0</a> ``</td>
+<td style="text-align:right">975120</td>
+<td style="text-align:right">7.89</td>
+<td style="text-align:right">8.16</td>
+<td style="text-align:right">8.91</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_75_2/">fastapi_0_75_2</a> ``</td>
+<td style="text-align:right">1038195</td>
+<td style="text-align:right">7.57</td>
+<td style="text-align:right">7.79</td>
+<td style="text-align:right">8.57</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_75_1/">fastapi_0_75_1</a> ``</td>
+<td style="text-align:right">1023405</td>
+<td style="text-align:right">7.69</td>
+<td style="text-align:right">7.98</td>
+<td style="text-align:right">8.68</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_75_0/">fastapi_0_75_0</a> ``</td>
+<td style="text-align:right">1023465</td>
+<td style="text-align:right">7.6</td>
+<td style="text-align:right">7.84</td>
+<td style="text-align:right">8.59</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_74_1/">fastapi_0_74_1</a> ``</td>
+<td style="text-align:right">1005990</td>
+<td style="text-align:right">7.75</td>
+<td style="text-align:right">8.07</td>
+<td style="text-align:right">8.78</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_74_0/">fastapi_0_74_0</a> ``</td>
+<td style="text-align:right">1067700</td>
+<td style="text-align:right">7.41</td>
+<td style="text-align:right">7.66</td>
+<td style="text-align:right">8.4</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_73_0/">fastapi_0_73_0</a> ``</td>
+<td style="text-align:right">1050030</td>
+<td style="text-align:right">7.47</td>
+<td style="text-align:right">7.74</td>
+<td style="text-align:right">8.97</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_72_0/">fastapi_0_72_0</a> ``</td>
+<td style="text-align:right">1048680</td>
+<td style="text-align:right">7.52</td>
+<td style="text-align:right">7.81</td>
+<td style="text-align:right">8.49</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_71_0/">fastapi_0_71_0</a> ``</td>
+<td style="text-align:right">1045500</td>
+<td style="text-align:right">7.56</td>
+<td style="text-align:right">7.88</td>
+<td style="text-align:right">8.56</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_70_1/">fastapi_0_70_1</a> ``</td>
+<td style="text-align:right">1066485</td>
+<td style="text-align:right">7.5</td>
+<td style="text-align:right">7.74</td>
+<td style="text-align:right">8.48</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_70_0/">fastapi_0_70_0</a> ``</td>
+<td style="text-align:right">1037250</td>
+<td style="text-align:right">7.69</td>
+<td style="text-align:right">7.97</td>
+<td style="text-align:right">8.66</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_69_0/">fastapi_0_69_0</a> ``</td>
+<td style="text-align:right">1062195</td>
+<td style="text-align:right">7.48</td>
+<td style="text-align:right">7.75</td>
+<td style="text-align:right">8.5</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_68_2/">fastapi_0_68_2</a> ``</td>
+<td style="text-align:right">1058235</td>
+<td style="text-align:right">7.55</td>
+<td style="text-align:right">7.77</td>
+<td style="text-align:right">8.53</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_68_1/">fastapi_0_68_1</a> ``</td>
+<td style="text-align:right">1065855</td>
+<td style="text-align:right">7.47</td>
+<td style="text-align:right">7.7</td>
+<td style="text-align:right">8.46</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_68_0/">fastapi_0_68_0</a> ``</td>
+<td style="text-align:right">1047795</td>
+<td style="text-align:right">7.55</td>
+<td style="text-align:right">7.9</td>
+<td style="text-align:right">8.58</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_67_0/">fastapi_0_67_0</a> ``</td>
+<td style="text-align:right">1055475</td>
+<td style="text-align:right">7.53</td>
+<td style="text-align:right">7.83</td>
+<td style="text-align:right">8.52</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_66_1/">fastapi_0_66_1</a> ``</td>
+<td style="text-align:right">1050765</td>
+<td style="text-align:right">7.53</td>
+<td style="text-align:right">7.79</td>
+<td style="text-align:right">8.55</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_66_0/">fastapi_0_66_0</a> ``</td>
+<td style="text-align:right">1053345</td>
+<td style="text-align:right">7.61</td>
+<td style="text-align:right">7.87</td>
+<td style="text-align:right">8.6</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_65_3/">fastapi_0_65_3</a> ``</td>
+<td style="text-align:right">1058250</td>
+<td style="text-align:right">7.53</td>
+<td style="text-align:right">7.83</td>
+<td style="text-align:right">8.53</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_65_2/">fastapi_0_65_2</a> ``</td>
+<td style="text-align:right">1059765</td>
+<td style="text-align:right">7.49</td>
+<td style="text-align:right">7.73</td>
+<td style="text-align:right">8.47</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_65_1/">fastapi_0_65_1</a> ``</td>
+<td style="text-align:right">1049145</td>
+<td style="text-align:right">7.59</td>
+<td style="text-align:right">7.85</td>
+<td style="text-align:right">9.17</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_65_0/">fastapi_0_65_0</a> ``</td>
+<td style="text-align:right">1066905</td>
+<td style="text-align:right">7.54</td>
+<td style="text-align:right">7.83</td>
+<td style="text-align:right">8.52</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_64_0/">fastapi_0_64_0</a> ``</td>
+<td style="text-align:right">1041030</td>
+<td style="text-align:right">7.63</td>
+<td style="text-align:right">7.95</td>
+<td style="text-align:right">8.62</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_63_0/">fastapi_0_63_0</a> ``</td>
+<td style="text-align:right">1063635</td>
+<td style="text-align:right">7.56</td>
+<td style="text-align:right">7.87</td>
+<td style="text-align:right">8.55</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_62_0/">fastapi_0_62_0</a> ``</td>
+<td style="text-align:right">1063335</td>
+<td style="text-align:right">7.53</td>
+<td style="text-align:right">7.83</td>
+<td style="text-align:right">8.71</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_61_2/">fastapi_0_61_2</a> ``</td>
+<td style="text-align:right">1050780</td>
+<td style="text-align:right">7.59</td>
+<td style="text-align:right">7.91</td>
+<td style="text-align:right">8.62</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_61_1/">fastapi_0_61_1</a> ``</td>
+<td style="text-align:right">1036245</td>
+<td style="text-align:right">7.61</td>
+<td style="text-align:right">7.99</td>
+<td style="text-align:right">9.19</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_61_0/">fastapi_0_61_0</a> ``</td>
+<td style="text-align:right">1041690</td>
+<td style="text-align:right">7.67</td>
+<td style="text-align:right">8.01</td>
+<td style="text-align:right">8.7</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_60_2/">fastapi_0_60_2</a> ``</td>
+<td style="text-align:right">1041465</td>
+<td style="text-align:right">7.6</td>
+<td style="text-align:right">7.97</td>
+<td style="text-align:right">9.64</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_60_1/">fastapi_0_60_1</a> ``</td>
+<td style="text-align:right">1025715</td>
+<td style="text-align:right">7.7</td>
+<td style="text-align:right">8.07</td>
+<td style="text-align:right">8.79</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_60_0/">fastapi_0_60_0</a> ``</td>
+<td style="text-align:right">1016865</td>
+<td style="text-align:right">9.84</td>
+<td style="text-align:right">10.57</td>
+<td style="text-align:right">10.42</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_59_0/">fastapi_0_59_0</a> ``</td>
+<td style="text-align:right">1018365</td>
+<td style="text-align:right">9.9</td>
+<td style="text-align:right">10.62</td>
+<td style="text-align:right">10.49</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_58_1/">fastapi_0_58_1</a> ``</td>
+<td style="text-align:right">1018200</td>
+<td style="text-align:right">9.82</td>
+<td style="text-align:right">10.5</td>
+<td style="text-align:right">10.41</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_58_0/">fastapi_0_58_0</a> ``</td>
+<td style="text-align:right">1010595</td>
+<td style="text-align:right">9.9</td>
+<td style="text-align:right">10.62</td>
+<td style="text-align:right">10.51</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_57_0/">fastapi_0_57_0</a> ``</td>
+<td style="text-align:right">1008360</td>
+<td style="text-align:right">9.91</td>
+<td style="text-align:right">10.69</td>
+<td style="text-align:right">11.02</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_56_1/">fastapi_0_56_1</a> ``</td>
+<td style="text-align:right">1014165</td>
+<td style="text-align:right">9.86</td>
+<td style="text-align:right">10.6</td>
+<td style="text-align:right">10.61</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_56_0/">fastapi_0_56_0</a> ``</td>
+<td style="text-align:right">1012245</td>
+<td style="text-align:right">9.94</td>
+<td style="text-align:right">10.67</td>
+<td style="text-align:right">10.52</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_55_1/">fastapi_0_55_1</a> ``</td>
+<td style="text-align:right">1017315</td>
+<td style="text-align:right">9.8</td>
+<td style="text-align:right">10.5</td>
+<td style="text-align:right">10.39</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_55_0/">fastapi_0_55_0</a> ``</td>
+<td style="text-align:right">1014015</td>
+<td style="text-align:right">9.94</td>
+<td style="text-align:right">10.67</td>
+<td style="text-align:right">10.5</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_54_2/">fastapi_0_54_2</a> ``</td>
+<td style="text-align:right">1010130</td>
+<td style="text-align:right">9.87</td>
+<td style="text-align:right">10.63</td>
+<td style="text-align:right">10.45</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_54_1/">fastapi_0_54_1</a> ``</td>
+<td style="text-align:right">1017255</td>
+<td style="text-align:right">9.82</td>
+<td style="text-align:right">10.51</td>
+<td style="text-align:right">10.66</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_54_0/">fastapi_0_54_0</a> ``</td>
+<td style="text-align:right">1009890</td>
+<td style="text-align:right">9.88</td>
+<td style="text-align:right">10.65</td>
+<td style="text-align:right">10.46</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_53_2/">fastapi_0_53_2</a> ``</td>
+<td style="text-align:right">1000905</td>
+<td style="text-align:right">10.02</td>
+<td style="text-align:right">10.74</td>
+<td style="text-align:right">10.61</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_53_1/">fastapi_0_53_1</a> ``</td>
+<td style="text-align:right">992940</td>
+<td style="text-align:right">10.05</td>
+<td style="text-align:right">10.71</td>
+<td style="text-align:right">10.62</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_53_0/">fastapi_0_53_0</a> ``</td>
+<td style="text-align:right">1022565</td>
+<td style="text-align:right">9.82</td>
+<td style="text-align:right">10.55</td>
+<td style="text-align:right">10.41</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_52_0/">fastapi_0_52_0</a> ``</td>
+<td style="text-align:right">1011150</td>
+<td style="text-align:right">9.95</td>
+<td style="text-align:right">10.66</td>
+<td style="text-align:right">10.53</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_51_0/">fastapi_0_51_0</a> ``</td>
+<td style="text-align:right">1011570</td>
+<td style="text-align:right">9.99</td>
+<td style="text-align:right">10.71</td>
+<td style="text-align:right">10.65</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_117_1/">fastapi_0_117_1</a> ``</td>
+<td style="text-align:right">844620</td>
+<td style="text-align:right">8.67</td>
+<td style="text-align:right">9.07</td>
+<td style="text-align:right">10.06</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_117_0/">fastapi_0_117_0</a> ``</td>
+<td style="text-align:right">849900</td>
+<td style="text-align:right">8.75</td>
+<td style="text-align:right">9.16</td>
+<td style="text-align:right">10.21</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_116_2/">fastapi_0_116_2</a> ``</td>
+<td style="text-align:right">837990</td>
+<td style="text-align:right">8.77</td>
+<td style="text-align:right">9.11</td>
+<td style="text-align:right">10.04</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_116_1/">fastapi_0_116_1</a> ``</td>
+<td style="text-align:right">843150</td>
+<td style="text-align:right">8.77</td>
+<td style="text-align:right">9.14</td>
+<td style="text-align:right">10.07</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_116_0/">fastapi_0_116_0</a> ``</td>
+<td style="text-align:right">847350</td>
+<td style="text-align:right">8.71</td>
+<td style="text-align:right">9.09</td>
+<td style="text-align:right">10.01</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_9/">fastapi_0_115_9</a> ``</td>
+<td style="text-align:right">833550</td>
+<td style="text-align:right">8.82</td>
+<td style="text-align:right">9.17</td>
+<td style="text-align:right">10.35</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_8/">fastapi_0_115_8</a> ``</td>
+<td style="text-align:right">852225</td>
+<td style="text-align:right">8.67</td>
+<td style="text-align:right">8.98</td>
+<td style="text-align:right">10.28</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_7/">fastapi_0_115_7</a> ``</td>
+<td style="text-align:right">847650</td>
+<td style="text-align:right">8.77</td>
+<td style="text-align:right">9.12</td>
+<td style="text-align:right">10.02</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_6/">fastapi_0_115_6</a> ``</td>
+<td style="text-align:right">846090</td>
+<td style="text-align:right">8.7</td>
+<td style="text-align:right">9.17</td>
+<td style="text-align:right">10.54</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_5/">fastapi_0_115_5</a> ``</td>
+<td style="text-align:right">841515</td>
+<td style="text-align:right">8.82</td>
+<td style="text-align:right">9.2</td>
+<td style="text-align:right">10.39</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_4/">fastapi_0_115_4</a> ``</td>
+<td style="text-align:right">851940</td>
+<td style="text-align:right">8.69</td>
+<td style="text-align:right">9.08</td>
+<td style="text-align:right">9.98</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_3/">fastapi_0_115_3</a> ``</td>
+<td style="text-align:right">835815</td>
+<td style="text-align:right">8.73</td>
+<td style="text-align:right">9.24</td>
+<td style="text-align:right">10.45</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_2/">fastapi_0_115_2</a> ``</td>
+<td style="text-align:right">838515</td>
+<td style="text-align:right">8.73</td>
+<td style="text-align:right">9.21</td>
+<td style="text-align:right">10.45</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_14/">fastapi_0_115_14</a> ``</td>
+<td style="text-align:right">853740</td>
+<td style="text-align:right">8.72</td>
+<td style="text-align:right">9.04</td>
+<td style="text-align:right">10.23</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_13/">fastapi_0_115_13</a> ``</td>
+<td style="text-align:right">849390</td>
+<td style="text-align:right">8.63</td>
+<td style="text-align:right">9.08</td>
+<td style="text-align:right">10.29</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_12/">fastapi_0_115_12</a> ``</td>
+<td style="text-align:right">846975</td>
+<td style="text-align:right">8.72</td>
+<td style="text-align:right">9.07</td>
+<td style="text-align:right">10.44</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_11/">fastapi_0_115_11</a> ``</td>
+<td style="text-align:right">842295</td>
+<td style="text-align:right">8.81</td>
+<td style="text-align:right">9.21</td>
+<td style="text-align:right">10.11</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_10/">fastapi_0_115_10</a> ``</td>
+<td style="text-align:right">834345</td>
+<td style="text-align:right">8.78</td>
+<td style="text-align:right">9.19</td>
+<td style="text-align:right">10.66</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_1/">fastapi_0_115_1</a> ``</td>
+<td style="text-align:right">726195</td>
+<td style="text-align:right">9.61</td>
+<td style="text-align:right">10.1</td>
+<td style="text-align:right">11.21</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_115_0/">fastapi_0_115_0</a> ``</td>
+<td style="text-align:right">731400</td>
+<td style="text-align:right">9.59</td>
+<td style="text-align:right">9.97</td>
+<td style="text-align:right">11.37</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_114_2/">fastapi_0_114_2</a> ``</td>
+<td style="text-align:right">750315</td>
+<td style="text-align:right">9.37</td>
+<td style="text-align:right">9.85</td>
+<td style="text-align:right">11.34</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_114_1/">fastapi_0_114_1</a> ``</td>
+<td style="text-align:right">757920</td>
+<td style="text-align:right">9.28</td>
+<td style="text-align:right">9.72</td>
+<td style="text-align:right">11.18</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_114_0/">fastapi_0_114_0</a> ``</td>
+<td style="text-align:right">750510</td>
+<td style="text-align:right">9.41</td>
+<td style="text-align:right">9.8</td>
+<td style="text-align:right">11.27</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_113_0/">fastapi_0_113_0</a> ``</td>
+<td style="text-align:right">744315</td>
+<td style="text-align:right">9.45</td>
+<td style="text-align:right">9.83</td>
+<td style="text-align:right">10.97</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_4/">fastapi_0_112_4</a> ``</td>
+<td style="text-align:right">751215</td>
+<td style="text-align:right">9.4</td>
+<td style="text-align:right">9.83</td>
+<td style="text-align:right">11.36</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_3/">fastapi_0_112_3</a> ``</td>
+<td style="text-align:right">760725</td>
+<td style="text-align:right">9.25</td>
+<td style="text-align:right">9.82</td>
+<td style="text-align:right">11.0</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_2/">fastapi_0_112_2</a> ``</td>
+<td style="text-align:right">763755</td>
+<td style="text-align:right">9.25</td>
+<td style="text-align:right">9.71</td>
+<td style="text-align:right">11.17</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_1/">fastapi_0_112_1</a> ``</td>
+<td style="text-align:right">766515</td>
+<td style="text-align:right">9.28</td>
+<td style="text-align:right">9.65</td>
+<td style="text-align:right">10.93</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_112_0/">fastapi_0_112_0</a> ``</td>
+<td style="text-align:right">747570</td>
+<td style="text-align:right">9.28</td>
+<td style="text-align:right">9.78</td>
+<td style="text-align:right">23.05</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_111_1/">fastapi_0_111_1</a> ``</td>
+<td style="text-align:right">762105</td>
+<td style="text-align:right">9.27</td>
+<td style="text-align:right">9.63</td>
+<td style="text-align:right">11.13</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_111_0_dev1/">fastapi_0_111_0_dev1</a> ``</td>
+<td style="text-align:right">762435</td>
+<td style="text-align:right">9.33</td>
+<td style="text-align:right">9.81</td>
+<td style="text-align:right">11.41</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_111_0/">fastapi_0_111_0</a> ``</td>
+<td style="text-align:right">764265</td>
+<td style="text-align:right">9.32</td>
+<td style="text-align:right">9.75</td>
+<td style="text-align:right">11.05</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_3_dev2/">fastapi_0_110_3_dev2</a> ``</td>
+<td style="text-align:right">764655</td>
+<td style="text-align:right">9.36</td>
+<td style="text-align:right">9.76</td>
+<td style="text-align:right">11.35</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_3_dev1/">fastapi_0_110_3_dev1</a> ``</td>
+<td style="text-align:right">773130</td>
+<td style="text-align:right">9.23</td>
+<td style="text-align:right">9.63</td>
+<td style="text-align:right">11.0</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_3/">fastapi_0_110_3</a> ``</td>
+<td style="text-align:right">754215</td>
+<td style="text-align:right">9.28</td>
+<td style="text-align:right">9.8</td>
+<td style="text-align:right">22.29</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_2/">fastapi_0_110_2</a> ``</td>
+<td style="text-align:right">766260</td>
+<td style="text-align:right">9.26</td>
+<td style="text-align:right">9.76</td>
+<td style="text-align:right">11.0</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_1/">fastapi_0_110_1</a> ``</td>
+<td style="text-align:right">763905</td>
+<td style="text-align:right">9.32</td>
+<td style="text-align:right">9.8</td>
+<td style="text-align:right">11.27</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_110_0/">fastapi_0_110_0</a> ``</td>
+<td style="text-align:right">768870</td>
+<td style="text-align:right">9.25</td>
+<td style="text-align:right">9.67</td>
+<td style="text-align:right">11.01</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_109_2/">fastapi_0_109_2</a> ``</td>
+<td style="text-align:right">770835</td>
+<td style="text-align:right">9.21</td>
+<td style="text-align:right">9.69</td>
+<td style="text-align:right">10.94</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_109_1/">fastapi_0_109_1</a> ``</td>
+<td style="text-align:right">774525</td>
+<td style="text-align:right">9.3</td>
+<td style="text-align:right">9.75</td>
+<td style="text-align:right">11.12</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_109_0/">fastapi_0_109_0</a> ``</td>
+<td style="text-align:right">756945</td>
+<td style="text-align:right">9.24</td>
+<td style="text-align:right">9.68</td>
+<td style="text-align:right">23.43</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_108_0/">fastapi_0_108_0</a> ``</td>
+<td style="text-align:right">877110</td>
+<td style="text-align:right">8.54</td>
+<td style="text-align:right">9.05</td>
+<td style="text-align:right">15.18</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_107_0/">fastapi_0_107_0</a> ``</td>
+<td style="text-align:right">901260</td>
+<td style="text-align:right">8.54</td>
+<td style="text-align:right">8.9</td>
+<td style="text-align:right">10.35</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_106_0/">fastapi_0_106_0</a> ``</td>
+<td style="text-align:right">941025</td>
+<td style="text-align:right">8.31</td>
+<td style="text-align:right">8.77</td>
+<td style="text-align:right">9.96</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_105_0/">fastapi_0_105_0</a> ``</td>
+<td style="text-align:right">941790</td>
+<td style="text-align:right">8.24</td>
+<td style="text-align:right">8.61</td>
+<td style="text-align:right">10.04</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_104_1/">fastapi_0_104_1</a> ``</td>
+<td style="text-align:right">948525</td>
+<td style="text-align:right">8.24</td>
+<td style="text-align:right">8.6</td>
+<td style="text-align:right">9.45</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_104_0/">fastapi_0_104_0</a> ``</td>
+<td style="text-align:right">954210</td>
+<td style="text-align:right">8.27</td>
+<td style="text-align:right">8.66</td>
+<td style="text-align:right">9.5</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_103_2/">fastapi_0_103_2</a> ``</td>
+<td style="text-align:right">939735</td>
+<td style="text-align:right">8.29</td>
+<td style="text-align:right">8.7</td>
+<td style="text-align:right">9.56</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_103_1/">fastapi_0_103_1</a> ``</td>
+<td style="text-align:right">942435</td>
+<td style="text-align:right">8.25</td>
+<td style="text-align:right">8.66</td>
+<td style="text-align:right">9.78</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_103_0/">fastapi_0_103_0</a> ``</td>
+<td style="text-align:right">949530</td>
+<td style="text-align:right">8.26</td>
+<td style="text-align:right">8.66</td>
+<td style="text-align:right">9.45</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_102_0/">fastapi_0_102_0</a> ``</td>
+<td style="text-align:right">946620</td>
+<td style="text-align:right">8.31</td>
+<td style="text-align:right">8.7</td>
+<td style="text-align:right">9.57</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_101_1/">fastapi_0_101_1</a> ``</td>
+<td style="text-align:right">936615</td>
+<td style="text-align:right">8.3</td>
+<td style="text-align:right">8.72</td>
+<td style="text-align:right">10.12</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_101_0/">fastapi_0_101_0</a> ``</td>
+<td style="text-align:right">942660</td>
+<td style="text-align:right">8.29</td>
+<td style="text-align:right">8.79</td>
+<td style="text-align:right">9.69</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_100_1/">fastapi_0_100_1</a> ``</td>
+<td style="text-align:right">927165</td>
+<td style="text-align:right">8.35</td>
+<td style="text-align:right">8.78</td>
+<td style="text-align:right">9.99</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/fastapi_0_100_0/">fastapi_0_100_0</a> ``</td>
+<td style="text-align:right">947430</td>
+<td style="text-align:right">8.29</td>
+<td style="text-align:right">8.64</td>
+<td style="text-align:right">9.74</td>
+</tr>
+</tbody>
+</table>
+
+            
+            
+        </body>
+        </html>
