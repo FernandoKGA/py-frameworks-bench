@@ -9,7 +9,8 @@ import csv
 import json
 import re
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Optional
+from packaging.version import Version
 import sys
 from collections import OrderedDict
 
@@ -165,8 +166,8 @@ def process_all_results(base_path: str = ".", filter_frameworks: Optional[List[s
             print(f"  Total de emissões: {total_emissions:.2e}")
             print(f"  Taxa média de emissões: {avg_emissions_rate:.2e}")
         print()
-    
-    return OrderedDict(sorted(results_data.items())) #melhora ordenação mas n resolveu
+        
+    return OrderedDict(sorted(results_data.items(), key=lambda item: Version(item[0]))) #melhora ordenação mas n resolveu
 
 
 def save_to_json(data: Dict[str, List[Dict[str, float]]], output_file: str = "carbon_emissions_data.json"):

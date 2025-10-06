@@ -4,6 +4,7 @@ import re
 import statistics as st
 from collections import OrderedDict, namedtuple
 from pathlib import Path
+from packaging.version import Version
 import jinja2
 import json
 
@@ -97,7 +98,7 @@ def do_json(results):
         name_file = name
 
     with open(f"docs/_posts/{name_file}.json", 'w') as target_file:
-        target_file.write(json.dumps(OrderedDict(sorted(json_result.items()))))
+        target_file.write(json.dumps(OrderedDict(sorted(json_result.items(), key=lambda item: Version(item[0])))))
 
 if __name__ == '__main__':
     render()
