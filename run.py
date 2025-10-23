@@ -1,16 +1,24 @@
 #!/usr/bin/env python3
-import subprocess
-from pathlib import Path
-import shutil
-import re
-from util.python_lib_info import get_versions
 import json
+import re
+import shutil
+import subprocess
+from packaging.version import Version
+from pathlib import Path
 
-# Dicionário: framework -> lista de versões desejadas
+from util.python_lib_info import get_versions
 
-BANNED =["blacksheep", "quart", "sanic", "emmett"]
+
+BANNED = ["blacksheep", "quart", "sanic", "emmett"]
 # FRAMEWORKS_NAMES = ['aiohttp', 'baize', 'muffin', 'starlette', 'django', 'falcon', 'tornado', 'fastapi']
-FRAMEWORKS_NAMES = ['fastapi']
+# FRAMEWORKS_NAMES = ['fastapi']
+FRAMEWORKS_RANGES = {
+    'fastapi': {'start': '0.51.0', 'end': '0.118.0'},
+    'starlette': {'start': None, 'end': None},
+    # --- Exemplos de como generalizar ---
+    # 'django':  {'start': '4.0', 'end': None}, # Pega tudo do Django 4.0 para cima
+    # 'starlette': {'start': None, 'end': '0.30.0'} # Pega tudo do Starlette ATÉ 0.30.0
+}
 FRAMEWORKS = {}
 
 NETWORK = "data"
@@ -65,12 +73,25 @@ def run_benchmark(framework_name, version):
 
 def main():
     good_versions = {}
-    for framework in FRAMEWORKS_NAMES:
+    for framework, limits in FRAMEWORKS_RANGES:
         good_versions[framework] = []
-        versions_list = sorted(get_versions(framework), reverse=True)
-        versions_list = [v for v in versions_list if "b" not in v and "a" not in v]  # Ignora versões beta e alpha
-        if versions_list:
-            FRAMEWORKS[framework] = versions_list
+        versions_list = sorted(get_versions(framework), key=lambda item: Version(item))
+        versions_list = [v for v in versions_list if "b" not in v and "a" not in v and "d" not in v]  # Ignora versões beta e alpha, dev
+        
+        start_version_str = limits.get('start')
+        end_version_str = limits.get('end')
+        
+        start_v = Version(start_version_str) if start_version_str else None
+        end_v = Version(end_version_str) if end_version_str else None
+        
+        filtered_list = [
+            v_str for v_str in versions_list 
+            if (start_v is None or start_v <= Version(v_str)) and
+            (end_v is None or Version(v_str) <= end_v)
+        ]
+        
+        if filtered_list:
+            FRAMEWORKS[framework] = filtered_list
         else:
             print(f"⚠️ Aviso: Nenhuma versão encontrada para o framework '{framework}'.")
     ensure_docker_network(NETWORK)
