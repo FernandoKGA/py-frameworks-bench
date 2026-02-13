@@ -19,14 +19,14 @@ Workflow recomendado:
   2. ./run.py --use-good-versions      # Benchmark completo apenas nas validadas
 """
 import subprocess
-from pathlib import Path
 import shutil
 import re
-from util.python_lib_info import get_versions
 import json
 import sys
 import time
 import requests
+from pathlib import Path
+from util.python_lib_info import get_versions
 
 # Mostra ajuda se solicitado
 if '--help' in sys.argv or '-h' in sys.argv:
@@ -164,25 +164,25 @@ def run_benchmark(framework_name, version, validate_only=False):
         
         # Valida se funciona
         return validate_framework(framework_name, version)
-    
-    # Modo benchmark completo
-    try:
-        cmd_df = f"./benchmark.sh {framework_name} {version}"
-        run(cmd_df)
-        
-        # Move resultados para diretório versionado
-        result_dir = ROOT_DIR / f"results_{versioned_name}"
-        if result_dir.exists():
-            shutil.rmtree(result_dir)
-        RESULTS_DIR.rename(result_dir)
-        
-        print(f"✅ Resultados salvos em: {result_dir}")
-        print(f"💾 Imagem {image_name} disponível para reuso\n")
-        
-        return True
-    except subprocess.CalledProcessError as e:
-        print(f"❌ Erro ao rodar benchmark para {versioned_name}: {e}")
-        return False
+    else:
+        # Modo benchmark completo
+        try:
+            cmd_df = f"./benchmark.sh {framework_name} {version}"
+            run(cmd_df)
+            
+            # Move resultados para diretório versionado
+            result_dir = ROOT_DIR / f"results_{versioned_name}"
+            if result_dir.exists():
+                shutil.rmtree(result_dir)
+            RESULTS_DIR.rename(result_dir)
+            
+            print(f"✅ Resultados salvos em: {result_dir}")
+            print(f"💾 Imagem {image_name} disponível para reuso\n")
+            
+            return True
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Erro ao rodar benchmark para {versioned_name}: {e}")
+            return False
 
 def list_existing_images(framework_name):
     """Lista todas as imagens existentes para um framework"""
