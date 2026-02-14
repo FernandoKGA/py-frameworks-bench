@@ -14,12 +14,17 @@ RESULTS_FILE_LOG=$RESULTS_DIR_LOGS"/"$NAME".txt"
 
 
 APP_NAME="app_${FRAMEWORK}"
-APP_IMAGE="${FRAMEWORK}_app"
+if [[ -n "$VERSION" ]]; then
+  APP_IMAGE="${FRAMEWORK}_app:${VERSION}"
+else
+  APP_IMAGE="${FRAMEWORK}_app:latest"
+fi
+
 APP_DIR="$ROOT_DIR/frameworks/$FRAMEWORK"
 SCRIPTS_DIR="$ROOT_DIR/wrk"
 
+echo "Usando Docker image: $APP_IMAGE"
 echo $SCRIPTS_DIR
-
 
 mkdir -p $RESULTS_DIR
 mkdir -p $RESULTS_DIR_LOGS
@@ -28,12 +33,22 @@ mkdir -p $RESULTS_DIR_CARBON
 # Remove container antigo, se existir
 docker rm -f $APP_NAME
 
-# Build da imagem
-docker build \
-  -f "$ROOT_DIR/frameworks/Dockerfile" \
-  -t $APP_IMAGE $APP_DIR
+# Verifica se a imagem já existe
+if docker image inspect $APP_IMAGE &> /dev/null; then
+  echo "Imagem $APP_IMAGE já existe, pulando build..."
+else
+  echo "Construindo imagem $APP_IMAGE..."
+  # Build da imagem com TAG versionada
+  docker build \
+    -f "$ROOT_DIR/frameworks/Dockerfile" \
+    -t $APP_IMAGE $APP_DIR
+  echo "Build concluído!"
+fi
 
 # Sobe o container da aplicação
+
+echo ">>> Iniciando container $APP_NAME..."
+
 echo "docker run -d \
   -p 8080:8080 \
   --name $APP_NAME \

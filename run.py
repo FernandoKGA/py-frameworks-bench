@@ -224,7 +224,7 @@ def main():
         print("=" * 60)
         
         # Usa as versões validadas
-        FRAMEWORKS.update({fw: versions for fw, versions in good_versions.items() if fw in FRAMEWORKS_NAMES})
+        FRAMEWORKS.update({fw: versions.copy() for fw, versions in good_versions.items() if fw in FRAMEWORKS_NAMES})
     else:
         # Coleta versões do PyPI
         for framework in FRAMEWORKS_NAMES:
@@ -256,12 +256,13 @@ def main():
             
             success = run_benchmark(framework, version, validate_only=VALIDATE_ONLY)
             
-            if success:
+            if success and not USE_GOOD_VERSIONS:
                 good_versions[framework].append(version)
     
     # Salva versões bem-sucedidas
-    with open(good_versions_file, "w") as f:
-        json.dump(good_versions, f, indent=4)
+    if not USE_GOOD_VERSIONS:
+        with open(good_versions_file, "w") as f:
+            json.dump(good_versions, f, indent=4)
     
     print("\n" + "=" * 60)
     if VALIDATE_ONLY:
@@ -279,11 +280,6 @@ def main():
         versions = good_versions.get(framework, [])
         if versions:
             print(f"  {framework}: {len(versions)} versões {'validadas' if VALIDATE_ONLY else 'com benchmark'}")
-            if len(versions) <= 5:
-                for v in versions:
-                    print(f"    - v{v}")
-            else:
-                print(f"    - v{versions[0]} ... v{versions[-1]} (e {len(versions)-2} outras)")
     
     if not VALIDATE_ONLY:
         # Mostra resumo de imagens criadas
