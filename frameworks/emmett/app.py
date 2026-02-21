@@ -18,7 +18,6 @@ save_versions_txt("emmett")
 
 tracker = OfflineEmissionsTracker(
     output_dir="/results",  # ou outro caminho acessível
-    country_iso_code="BRA",  # opcional: Brasil
     log_level="info"
 )
 tracker.start()

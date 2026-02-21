@@ -59,6 +59,7 @@ docker run -d \
   -p 8080:8080 \
   --name $APP_NAME \
   -v $RESULTS_DIR_CARBON:/results \
+  --env-file .env
   $APP_IMAGE
 
 echo "Rodando"
@@ -136,19 +137,17 @@ finish_benchmark() {
   docker stop -t 5 $APP_NAME
 }
 
-run_benchmark "html" "html"
-run_benchmark "upload" "upload"
-run_benchmark "api/users/1/records/1?query=test" "api"
+# run_benchmark "html" "html"
+# run_benchmark "upload" "upload"
+# run_benchmark "api/users/1/records/1?query=test" "api"
 
-#run_benchmark_hey "html" "html" 500000
-#run_benchmark_hey "upload" "upload" 500000
-#run_benchmark_hey "api/users/1/records/1?query=test" "api" 500000
+run_benchmark_hey "html" "html" 5000
+run_benchmark_hey "upload" "upload" 5000
+run_benchmark_hey "api/users/1/records/1?query=test" "api" 5000
 
 #run_benchmark_hey "html" "html" "" "30s"
 #run_benchmark_hey "upload" "upload" "" "30s"
 #run_benchmark_hey "api/users/1/records/1?query=test" "api" "" "30s"
-
-
 
 finish_benchmark
 

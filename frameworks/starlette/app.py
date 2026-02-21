@@ -16,7 +16,6 @@ def save_versions_txt(lib, filepath="/results/version.txt"):
 save_versions_txt("Starlette")
 tracker = OfflineEmissionsTracker(
     output_dir="/results",  # ou outro caminho acessível
-    country_iso_code="BRA",  # opcional: Brasil
     log_level="info"
 )
 tracker.start()

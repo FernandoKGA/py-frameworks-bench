@@ -51,6 +51,21 @@ ROOT_DIR = Path(__file__).parent.resolve()
 BASE_FRAMEWORKS_DIR = ROOT_DIR / "frameworks"
 RESULTS_DIR = ROOT_DIR / "results"
 
+def parse_rounds() -> int:
+    if "--rounds" in sys.argv:
+        idx = sys.argv.index("--rounds")
+        try:
+            value = int(sys.argv[idx + 1])
+            if value < 1:
+                raise ValueError
+            return value
+        except (IndexError, ValueError):
+            print("❌ --rounds requer um número inteiro positivo. Ex: --rounds 5")
+            sys.exit(1)
+    return 1
+
+ROUNDS = parse_rounds()
+
 def run(cmd, **kwargs):
     print(f"» Rodando: {cmd}")
     subprocess.run(cmd, shell=True, check=True, **kwargs)
@@ -77,6 +92,17 @@ def image_exists(image_name):
     """Verifica se uma imagem Docker existe localmente"""
     success, _ = run_output(f"docker image inspect {image_name}")
     return success
+
+def get_next_execution_number() -> int:
+    """Detecta o número da última execução e retorna o próximo."""
+    existing = [
+        d for d in ROOT_DIR.iterdir()
+        if d.is_dir() and re.match(r"^results_exc_(\d+)$", d.name)
+    ]
+    if not existing:
+        return 1
+    last = max(int(re.search(r"(\d+)$", d.name).group(1)) for d in existing)
+    return last + 1
 
 def validate_framework(framework_name, version):
     """Valida se o framework funciona com uma requisição rápida"""
@@ -129,7 +155,7 @@ def prepare_versioned_framework(base_name, version):
     new_lines.append(f"{base_name}=={version}")
     req_file.write_text("\n".join(new_lines) + "\n")
 
-def run_benchmark(framework_name, version, validate_only=False):
+def run_benchmark(framework_name, version, validate_only=False, exc_dir: Path = None):
     versioned_name = f"{framework_name}_{version.replace('.', '_')}"
     image_name = f"{framework_name}_app:{version}"
     
@@ -170,8 +196,9 @@ def run_benchmark(framework_name, version, validate_only=False):
             cmd_df = f"./benchmark.sh {framework_name} {version}"
             run(cmd_df)
             
-            # Move resultados para diretório versionado
-            result_dir = ROOT_DIR / f"results_{versioned_name}"
+            # Destino: dentro de exc_dir (rodada) ou raiz se rodada única sem flag
+            base_dir = exc_dir if exc_dir is not None else ROOT_DIR
+            result_dir = base_dir / f"results_{versioned_name}"
             if result_dir.exists():
                 shutil.rmtree(result_dir)
             RESULTS_DIR.rename(result_dir)
@@ -203,6 +230,9 @@ def main():
     else:
         print(f"🏃 Modo: Benchmark completo")
     
+    if not VALIDATE_ONLY:
+        print(f"🔁 Rodadas: {ROUNDS}")
+
     print("=" * 60)
     
     good_versions = {}
@@ -246,48 +276,75 @@ def main():
     
     ensure_docker_network(NETWORK)
     
-    total_frameworks = sum(len(versions) for versions in FRAMEWORKS.values())
-    current = 0
+    total_versions = sum(len(versions) for versions in FRAMEWORKS.values())
+
+    # Modo validação: sem rodadas
+    if VALIDATE_ONLY:
+        current = 0
+        for framework, versions in FRAMEWORKS.items():
+            for version in versions:
+                current += 1
+                print(f"\n📊 Progresso: {current}/{total_versions}")
+                success = run_benchmark(framework, version, validate_only=True)
+                if success and not USE_GOOD_VERSIONS:
+                    good_versions[framework].append(version)
+
+        if not USE_GOOD_VERSIONS:
+            with open(good_versions_file, "w") as f:
+                json.dump(good_versions, f, indent=4)
+        
+        print("\n" + "=" * 60)
+        print("✅ Validação concluída!")
+        print(f"📊 Versões validadas salvas em: {good_versions_file}")
+        print("\n💡 Para rodar benchmarks completos nas versões validadas:")
+        print("   ./run.py --use-good-versions")
+        return
     
-    for framework, versions in FRAMEWORKS.items():
-        for version in versions:
-            current += 1
-            print(f"\n📊 Progresso: {current}/{total_frameworks}")
-            
-            success = run_benchmark(framework, version, validate_only=VALIDATE_ONLY)
-            
-            if success and not USE_GOOD_VERSIONS:
-                good_versions[framework].append(version)
+    # Modo benchmark: executa N rodadas
+    next_exc = get_next_execution_number()
     
-    # Salva versões bem-sucedidas
+    for round_offset in range(ROUNDS):
+        exc_number = next_exc + round_offset
+        exc_dir = ROOT_DIR / f"results_exc_{exc_number}"
+        exc_dir.mkdir(parents=True, exist_ok=True)
+        
+        print(f"\n{'#' * 60}")
+        print(f"# RODADA {exc_number}  ({round_offset + 1}/{ROUNDS})")
+        print(f"# Diretório: {exc_dir.name}")
+        print(f"{'#' * 60}")
+        
+        current = 0
+        for framework, versions in FRAMEWORKS.items():
+            for version in versions:
+                current += 1
+                print(f"\n📊 [{exc_dir.name}] Progresso: {current}/{total_versions}")
+                success = run_benchmark(framework, version, validate_only=False, exc_dir=exc_dir)
+                if success and not USE_GOOD_VERSIONS:
+                    if version not in good_versions.get(framework, []):
+                        good_versions.setdefault(framework, []).append(version)
+        
+        print(f"\n✅ Rodada {exc_number} concluída → {exc_dir.name}/")
+    
+    # Salva good_versions apenas se não estava usando o arquivo
     if not USE_GOOD_VERSIONS:
         with open(good_versions_file, "w") as f:
             json.dump(good_versions, f, indent=4)
     
     print("\n" + "=" * 60)
-    if VALIDATE_ONLY:
-        print("✅ Validação concluída!")
-        print(f"📊 Versões validadas salvas em: {good_versions_file}")
-        print("\n💡 Para rodar benchmarks completos nas versões validadas:")
-        print("   ./run.py --use-good-versions")
-    else:
-        print("✅ Todos os benchmarks concluídos!")
-        print(f"📊 Resultados salvos em: {good_versions_file}")
+    print(f"✅ Todas as {ROUNDS} rodada(s) concluídas!")
     
-    # Mostra resumo de versões
-    print("\n📈 Resumo por framework:")
+    # Mostra resumo das rodadas criadas
+    created = sorted(
+        [d for d in ROOT_DIR.iterdir() if re.match(r"^results_exc_\d+$", d.name)],
+        key=lambda d: int(re.search(r"(\d+)$", d.name).group(1))
+    )
+    print(f"\n📁 Execuções disponíveis ({len(created)} total)")
+    
+    print("\n🐳 Imagens Docker em cache:")
     for framework in FRAMEWORKS_NAMES:
-        versions = good_versions.get(framework, [])
-        if versions:
-            print(f"  {framework}: {len(versions)} versões {'validadas' if VALIDATE_ONLY else 'com benchmark'}")
-    
-    if not VALIDATE_ONLY:
-        # Mostra resumo de imagens criadas
-        print("\n🐳 Imagens Docker disponíveis:")
-        for framework in FRAMEWORKS_NAMES:
-            images = list_existing_images(framework)
-            if images:
-                print(f"  {framework}: {len(images)} versões em cache")
+        images = list_existing_images(framework)
+        if images:
+            print(f"  {framework}: {len(images)} versões")
 
 if __name__ == "__main__":
     main()
