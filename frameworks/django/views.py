@@ -5,13 +5,19 @@ from django.urls import path
 from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseBadRequest
 import json
 from codecarbon import OfflineEmissionsTracker
+from codecarbon.output import FileOutput, EmissionsData
+
+
+class CustomOutput(FileOutput):
+    def live_out(self, total: EmissionsData, delta: EmissionsData):
+        self.out(total, delta)
 
 tracker = OfflineEmissionsTracker(
     output_dir="/results",  # ou outro caminho acessível
-    log_level="info"
+    log_level="info",
+    output_handlers=[CustomOutput(output_file_name="emissions.csv",output_dir="/results")],
 )
 tracker.start()
-
 
 
 async def html(request):

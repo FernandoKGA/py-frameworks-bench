@@ -6,6 +6,7 @@ from aiohttp.web import (
 
 from importlib.metadata import version, PackageNotFoundError
 from codecarbon import OfflineEmissionsTracker
+from codecarbon.output import FileOutput, EmissionsData
 
 def save_versions_txt(lib, filepath="/results/version.txt"):
     with open(filepath, "w") as f:
@@ -80,9 +81,14 @@ async def api(request):
         'data': await request.json(),
     })
 
+class CustomOutput(FileOutput):
+    def live_out(self, total: EmissionsData, delta: EmissionsData):
+        self.out(total, delta)
+
 tracker = OfflineEmissionsTracker(
     output_dir="/results",  # ou outro caminho acessível
-    log_level="info"
+    log_level="info",
+    output_handlers=[CustomOutput(output_file_name="emissions.csv",output_dir="/results")],
 )
 tracker.start()
 app = Application()

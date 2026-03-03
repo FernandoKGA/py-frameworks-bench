@@ -11,7 +11,7 @@ RUN /usr/local/bin/pip install --no-cache-dir \
     ujson \
     uvicorn[standard]
 
-RUN pip install codecarbon pyinstrument setuptools wheel
+RUN pip install --no-cache-dir codecarbon==3.0.7 pyinstrument setuptools wheel
 
 ONBUILD COPY requirements.txt /app/requirements.txt
 ONBUILD RUN /usr/local/bin/pip install --no-cache-dir -r requirements.txt

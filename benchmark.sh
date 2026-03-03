@@ -189,14 +189,9 @@ run_benchmark_hey() {
 }
 
 finish_benchmark() {
-  docker run --rm \
-  --network host \
-  -v $SCRIPTS_DIR:/scripts \
-  -v $RESULTS_DIR_LOGS:/results \
-  wrk \
-  -t1 -c1 -d15s \
-  http://localhost:8080/save
-  sleep 3
+  curl http://localhost:8080/save
+  
+  sleep 1
   docker stop -t 5 $APP_NAME
 }
 
@@ -235,9 +230,6 @@ run_benchmark_hey \
   "PUT" "application/json" '{"foo": "bar"}' "" \
   "-H" "authorization: user"
 
-#run_benchmark_hey "html" "html" "" "30s"
-#run_benchmark_hey "upload" "upload" "" "30s"
-#run_benchmark_hey "api/users/1/records/1?query=test" "api" "" "30s"
 
 finish_benchmark
 
@@ -245,5 +237,4 @@ finish_benchmark
 rm -f "$MULTIPART_BODY_FILE"
 
 echo "=== Benchmark concluído. Resultados salvos em $RESULTS_DIR_LOGS ==="
-sleep 3
-
+sleep 1
