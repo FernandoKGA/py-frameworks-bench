@@ -185,7 +185,7 @@ run_benchmark_hey() {
 
   echo "Benchmark '$label' concluído. Resultado em $outfile"
 
-  sleep 3
+  sleep 1
 }
 
 finish_benchmark() {
