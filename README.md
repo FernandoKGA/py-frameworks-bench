@@ -1,667 +1,145 @@
-# Async Python Web Frameworks comparison
+# Python Web Frameworks Benchmark for Emissions
 
-https://klen.github.io/py-frameworks-bench/
-----------
-#### Updated: 2025-09-28
+Based on https://github.com/klen/py-frameworks-bench
 
-[![benchmarks](https://github.com/klen/py-frameworks-bench/actions/workflows/benchmarks.yml/badge.svg)](https://github.com/klen/py-frameworks-bench/actions/workflows/benchmarks.yml)
-[![tests](https://github.com/klen/py-frameworks-bench/actions/workflows/tests.yml/badge.svg)](https://github.com/klen/py-frameworks-bench/actions/workflows/tests.yml)
+---
 
-----------
+This is a benchmark for asynchronous Python web frameworks. Most of the frameworks are ASGI-compatible (aiohttp is an exception).
 
-This is a simple benchmark for python async frameworks. Almost all of the
-frameworks are ASGI-compatible (aiohttp and tornado are exceptions on the
-moment).
+The goal of the benchmark is not to evaluate deployment strategies (e.g., uvicorn vs hypercorn) or database layers (ORM, drivers), but the frameworks themselves and their emissions. The benchmark exercises request parsing (body, headers, formdata, query strings), routing, and response generation. The emissions are measured using [CodeCarbon](https://docs.codecarbon.io/latest/).
 
-The objective of the benchmark is not testing deployment (like uvicorn vs
-hypercorn and etc) or database (ORM, drivers) but instead test the frameworks
-itself. The benchmark checks request parsing (body, headers, formdata,
-queries), routing, responses.
+## Table of Contents
 
-## Table of contents
+- [Methodology](#methodology)
+- [Frameworks Under Test](#frameworks-under-test)
+- [Test Types](#test-types)
+- [Infrastructure and Automation](#infrastructure-and-automation)
+- [How to Run](#how-to-run)
 
-* [The Methodic](#the-methodic)
-* [The Results](#the-results-2025-09-28)
-    * [Accept a request and return HTML response with a custom dynamic header](#html)
-    * [Parse path params, query string, JSON body and return a json response](#api)
-    * [Parse uploaded file, store it on disk and return a text response](#upload)
-    * [Composite stats ](#composite)
+---
 
+## Methodology
 
+Results are collected using a Dockerized version of [hey v0.1.4](https://hub.docker.com/layers/vinixnan/hey/0.1.4/images/) with the following parameters:
 
-<img src='https://quickchart.io/chart?width=800&height=400&c=%7Btype%3A%22bar%22%2Cdata%3A%7Blabels%3A%5B%22fastapi.0.100.0%22%2C%22fastapi.0.100.1%22%2C%22fastapi.0.101.0%22%2C%22fastapi.0.101.1%22%2C%22fastapi.0.102.0%22%2C%22fastapi.0.103.0%22%2C%22fastapi.0.103.1%22%2C%22fastapi.0.103.2%22%2C%22fastapi.0.104.0%22%2C%22fastapi.0.104.1%22%2C%22fastapi.0.105.0%22%2C%22fastapi.0.106.0%22%2C%22fastapi.0.107.0%22%2C%22fastapi.0.108.0%22%2C%22fastapi.0.109.0%22%2C%22fastapi.0.109.1%22%2C%22fastapi.0.109.2%22%2C%22fastapi.0.110.0%22%2C%22fastapi.0.110.1%22%2C%22fastapi.0.110.2%22%2C%22fastapi.0.110.3%22%2C%22fastapi.0.110.3.dev1%22%2C%22fastapi.0.110.3.dev2%22%2C%22fastapi.0.111.0%22%2C%22fastapi.0.111.0.dev1%22%2C%22fastapi.0.111.1%22%2C%22fastapi.0.112.0%22%2C%22fastapi.0.112.1%22%2C%22fastapi.0.112.2%22%2C%22fastapi.0.112.3%22%2C%22fastapi.0.112.4%22%2C%22fastapi.0.113.0%22%2C%22fastapi.0.114.0%22%2C%22fastapi.0.114.1%22%2C%22fastapi.0.114.2%22%2C%22fastapi.0.115.0%22%2C%22fastapi.0.115.1%22%2C%22fastapi.0.115.10%22%2C%22fastapi.0.115.11%22%2C%22fastapi.0.115.12%22%2C%22fastapi.0.115.13%22%2C%22fastapi.0.115.14%22%2C%22fastapi.0.115.2%22%2C%22fastapi.0.115.3%22%2C%22fastapi.0.115.4%22%2C%22fastapi.0.115.5%22%2C%22fastapi.0.115.6%22%2C%22fastapi.0.115.7%22%2C%22fastapi.0.115.8%22%2C%22fastapi.0.115.9%22%2C%22fastapi.0.116.0%22%2C%22fastapi.0.116.1%22%2C%22fastapi.0.116.2%22%2C%22fastapi.0.117.0%22%2C%22fastapi.0.117.1%22%2C%22fastapi.0.51.0%22%2C%22fastapi.0.52.0%22%2C%22fastapi.0.53.0%22%2C%22fastapi.0.53.1%22%2C%22fastapi.0.53.2%22%2C%22fastapi.0.54.0%22%2C%22fastapi.0.54.1%22%2C%22fastapi.0.54.2%22%2C%22fastapi.0.55.0%22%2C%22fastapi.0.55.1%22%2C%22fastapi.0.56.0%22%2C%22fastapi.0.56.1%22%2C%22fastapi.0.57.0%22%2C%22fastapi.0.58.0%22%2C%22fastapi.0.58.1%22%2C%22fastapi.0.59.0%22%2C%22fastapi.0.60.0%22%2C%22fastapi.0.60.1%22%2C%22fastapi.0.60.2%22%2C%22fastapi.0.61.0%22%2C%22fastapi.0.61.1%22%2C%22fastapi.0.61.2%22%2C%22fastapi.0.62.0%22%2C%22fastapi.0.63.0%22%2C%22fastapi.0.64.0%22%2C%22fastapi.0.65.0%22%2C%22fastapi.0.65.1%22%2C%22fastapi.0.65.2%22%2C%22fastapi.0.65.3%22%2C%22fastapi.0.66.0%22%2C%22fastapi.0.66.1%22%2C%22fastapi.0.67.0%22%2C%22fastapi.0.68.0%22%2C%22fastapi.0.68.1%22%2C%22fastapi.0.68.2%22%2C%22fastapi.0.69.0%22%2C%22fastapi.0.70.0%22%2C%22fastapi.0.70.1%22%2C%22fastapi.0.71.0%22%2C%22fastapi.0.72.0%22%2C%22fastapi.0.73.0%22%2C%22fastapi.0.74.0%22%2C%22fastapi.0.74.1%22%2C%22fastapi.0.75.0%22%2C%22fastapi.0.75.1%22%2C%22fastapi.0.75.2%22%2C%22fastapi.0.76.0%22%2C%22fastapi.0.77.0%22%2C%22fastapi.0.77.1%22%2C%22fastapi.0.78.0%22%2C%22fastapi.0.79.0%22%2C%22fastapi.0.79.1%22%2C%22fastapi.0.80.0%22%2C%22fastapi.0.81.0%22%2C%22fastapi.0.82.0%22%2C%22fastapi.0.83.0%22%2C%22fastapi.0.84.0%22%2C%22fastapi.0.85.0%22%2C%22fastapi.0.85.1%22%2C%22fastapi.0.85.2%22%2C%22fastapi.0.86.0%22%2C%22fastapi.0.87.0%22%2C%22fastapi.0.88.0%22%2C%22fastapi.0.89.0%22%2C%22fastapi.0.89.1%22%2C%22fastapi.0.90.0%22%2C%22fastapi.0.90.1%22%2C%22fastapi.0.91.0%22%2C%22fastapi.0.92.0%22%2C%22fastapi.0.93.0%22%2C%22fastapi.0.94.0%22%2C%22fastapi.0.94.1%22%2C%22fastapi.0.95.0%22%2C%22fastapi.0.95.1%22%2C%22fastapi.0.95.2%22%2C%22fastapi.0.96.0%22%2C%22fastapi.0.96.1%22%2C%22fastapi.0.97.0%22%2C%22fastapi.0.98.0%22%2C%22fastapi.0.99.0%22%2C%22fastapi.0.99.1%22%5D%2Cdatasets%3A%5B%7Blabel%3A%22num%20of%20req%22%2Cdata%3A%5B947430%2C927165%2C942660%2C936615%2C946620%2C949530%2C942435%2C939735%2C954210%2C948525%2C941790%2C941025%2C901260%2C877110%2C756945%2C774525%2C770835%2C768870%2C763905%2C766260%2C754215%2C773130%2C764655%2C764265%2C762435%2C762105%2C747570%2C766515%2C763755%2C760725%2C751215%2C744315%2C750510%2C757920%2C750315%2C731400%2C726195%2C834345%2C842295%2C846975%2C849390%2C853740%2C838515%2C835815%2C851940%2C841515%2C846090%2C847650%2C852225%2C833550%2C847350%2C843150%2C837990%2C849900%2C844620%2C1011570%2C1011150%2C1022565%2C992940%2C1000905%2C1009890%2C1017255%2C1010130%2C1014015%2C1017315%2C1012245%2C1014165%2C1008360%2C1010595%2C1018200%2C1018365%2C1016865%2C1025715%2C1041465%2C1041690%2C1036245%2C1050780%2C1063335%2C1063635%2C1041030%2C1066905%2C1049145%2C1059765%2C1058250%2C1053345%2C1050765%2C1055475%2C1047795%2C1065855%2C1058235%2C1062195%2C1037250%2C1066485%2C1045500%2C1048680%2C1050030%2C1067700%2C1005990%2C1023465%2C1023405%2C1038195%2C975120%2C998160%2C992430%2C972600%2C972645%2C969420%2C975675%2C978195%2C971430%2C978045%2C976740%2C980100%2C964935%2C964695%2C963045%2C964095%2C964080%2C981825%2C959625%2C966435%2C965385%2C975285%2C976470%2C961380%2C966510%2C965070%2C976485%2C967260%2C976860%2C960930%2C973845%2C979965%2C964545%2C978105%2C961575%5D%7D%5D%7D%7D' />
+```
+hey -c 64 -o "csv" -m $method -n $max_requests [URL]
+```
 
-## The Methodic
+Each version of each framework is executed across multiple rounds to ensure statistical validity. The collected metrics include, but are not limited to:
 
-The benchmark runs as a [Github Action](https://github.com/features/actions).
-According to the [github
-documentation](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners)
-the hardware specification for the runs is:
+- **Throughput** (req/s)
+- **Percentile latencies** (P95, P99)
+- **Energy consumed** (via [CodeCarbon](https://docs.codecarbon.io/latest/))
+- **CPU power draw**
+- **Estimated CO₂ emissions**
 
-* 2-core vCPU (Intel® Xeon® Platinum 8272CL (Cascade Lake), Intel® Xeon® 8171M 2.1GHz (Skylake))
-* 7 GB of RAM memory
-* 14 GB of SSD disk space
-* OS Ubuntu 20.04
+---
 
-[ASGI](https://asgi.readthedocs.io/en/latest/) apps are running from docker using the gunicorn/uvicorn command:
+## Frameworks Under Test
 
-    gunicorn -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8080 app:app
+The following asynchronous Python web frameworks are evaluated across multiple released versions:
 
-Applications' source code can be found
-[here](https://github.com/klen/py-frameworks-bench/tree/develop/frameworks).
+- [FastAPI](https://github.com/tiangolo/fastapi)
+- [Starlette](https://github.com/encode/starlette)
+- [Django](https://www.djangoproject.com/)
+- [Sanic](https://sanic.dev/)
+- [Baize](https://github.com/abersheeran/baize)
+- [Muffin](https://github.com/klen/muffin)
+- [aiohttp](https://docs.aiohttp.org/)
+- [Quart](https://github.com/pallets/quart)
+- [Emmett](https://emmett.sh/)
+- [BlackSheep](https://github.com/Neoteroi/BlackSheep)
+- [Tornado](https://www.tornadoweb.org/)
 
-Results received with WRK utility using the params:
+> **Note:** Not all frameworks have fully functional benchmark results across all tested versions. Version-specific incompatibilities are treated as benchmark findings and are documented accordingly.
 
-    wrk -d15s -t4 -c64 [URL]
+---
 
-The benchmark has a three kind of tests:
+## Test Types
 
-1. "Simple" test: accept a request and return HTML response with custom dynamic
-   header. The test simulates just a single HTML response.
+The benchmark covers three endpoint types:
 
-2. "API" test: Check headers, parse path params, query string, JSON body and return a json
-   response. The test simulates an JSON REST API.
+1. **HTML** (`/api/html`): Accepts a request and returns a simple HTML response with a custom dynamic header. Simulates a plain HTML response.
 
-3. "Upload" test: accept an uploaded file and store it on disk. The test
-   simulates multipart formdata processing and work with files.
+2. **API** (`/api/`): Checks headers, parses path parameters, query string, and JSON body, then returns a JSON response. Simulates a JSON REST API.
 
+3. **Upload** (`/api/upload`): Accepts a file uploaded via multipart formdata and processes it. Simulates multipart file upload handling.
 
-## The Results (2025-09-28)
+The application source code for each framework can be found in the [`frameworks/`](./frameworks) directory.
 
-<h3 id="html"> Accept a request and return HTML response with a custom dynamic header</h3>
-<details open>
-<summary> The test simulates just a single HTML response. </summary>
+---
 
-Sorted by max req/s
+## Infrastructure and Automation
 
-| Framework | Requests/sec | Latency 50% (ms) | Latency 75% (ms) | Latency Avg (ms) |
-| --------- | -----------: | ---------------: | ---------------: | ---------------: |
-| [fastapi.0.100.0](https://pypi.org/project/fastapi.0.100.0/) `` | 34416 | 3.30 | 3.52 | 4.67
-| [fastapi.0.100.1](https://pypi.org/project/fastapi.0.100.1/) `` | 33377 | 3.36 | 3.82 | 5.40
-| [fastapi.0.101.0](https://pypi.org/project/fastapi.0.101.0/) `` | 34199 | 3.29 | 3.67 | 4.47
-| [fastapi.0.101.1](https://pypi.org/project/fastapi.0.101.1/) `` | 34013 | 3.31 | 3.64 | 5.82
-| [fastapi.0.102.0](https://pypi.org/project/fastapi.0.102.0/) `` | 34417 | 3.30 | 3.52 | 4.10
-| [fastapi.0.103.0](https://pypi.org/project/fastapi.0.103.0/) `` | 34573 | 3.28 | 3.59 | 4.03
-| [fastapi.0.103.1](https://pypi.org/project/fastapi.0.103.1/) `` | 34223 | 3.29 | 3.67 | 4.82
-| [fastapi.0.103.2](https://pypi.org/project/fastapi.0.103.2/) `` | 34039 | 3.31 | 3.65 | 4.16
-| [fastapi.0.104.0](https://pypi.org/project/fastapi.0.104.0/) `` | 34789 | 3.25 | 3.58 | 3.99
-| [fastapi.0.104.1](https://pypi.org/project/fastapi.0.104.1/) `` | 34496 | 3.29 | 3.51 | 4.07
-| [fastapi.0.105.0](https://pypi.org/project/fastapi.0.105.0/) `` | 33997 | 3.31 | 3.64 | 5.81
-| [fastapi.0.106.0](https://pypi.org/project/fastapi.0.106.0/) `` | 34229 | 3.29 | 3.59 | 5.21
-| [fastapi.0.107.0](https://pypi.org/project/fastapi.0.107.0/) `` | 32332 | 3.50 | 3.74 | 5.89
-| [fastapi.0.108.0](https://pypi.org/project/fastapi.0.108.0/) `` | 30959 | 3.56 | 4.05 | 20.47
-| [fastapi.0.109.0](https://pypi.org/project/fastapi.0.109.0/) `` | 25573 | 4.24 | 4.79 | 43.68
-| [fastapi.0.109.1](https://pypi.org/project/fastapi.0.109.1/) `` | 26980 | 4.19 | 4.44 | 6.42
-| [fastapi.0.109.2](https://pypi.org/project/fastapi.0.109.2/) `` | 26324 | 4.28 | 4.74 | 6.26
-| [fastapi.0.110.0](https://pypi.org/project/fastapi.0.110.0/) `` | 26358 | 4.31 | 4.56 | 6.38
-| [fastapi.0.110.1](https://pypi.org/project/fastapi.0.110.1/) `` | 26175 | 4.31 | 4.69 | 6.95
-| [fastapi.0.110.2](https://pypi.org/project/fastapi.0.110.2/) `` | 26294 | 4.31 | 4.64 | 6.25
-| [fastapi.0.110.3](https://pypi.org/project/fastapi.0.110.3/) `` | 25342 | 4.29 | 4.85 | 40.04
-| [fastapi.0.110.3.dev1](https://pypi.org/project/fastapi.0.110.3.dev1/) `` | 26597 | 4.25 | 4.54 | 6.35
-| [fastapi.0.110.3.dev2](https://pypi.org/project/fastapi.0.110.3.dev2/) `` | 26141 | 4.34 | 4.63 | 7.06
-| [fastapi.0.111.0](https://pypi.org/project/fastapi.0.111.0/) `` | 26145 | 4.32 | 4.62 | 6.18
-| [fastapi.0.111.0.dev1](https://pypi.org/project/fastapi.0.111.0.dev1/) `` | 26128 | 4.32 | 4.72 | 7.26
-| [fastapi.0.111.1](https://pypi.org/project/fastapi.0.111.1/) `` | 26015 | 4.37 | 4.60 | 6.64
-| [fastapi.0.112.0](https://pypi.org/project/fastapi.0.112.0/) `` | 25066 | 4.31 | 4.87 | 42.40
-| [fastapi.0.112.1](https://pypi.org/project/fastapi.0.112.1/) `` | 26498 | 4.29 | 4.50 | 5.94
-| [fastapi.0.112.2](https://pypi.org/project/fastapi.0.112.2/) `` | 25960 | 4.35 | 4.69 | 6.86
-| [fastapi.0.112.3](https://pypi.org/project/fastapi.0.112.3/) `` | 25891 | 4.33 | 4.95 | 6.34
-| [fastapi.0.112.4](https://pypi.org/project/fastapi.0.112.4/) `` | 26263 | 4.31 | 4.64 | 6.90
-| [fastapi.0.113.0](https://pypi.org/project/fastapi.0.113.0/) `` | 25846 | 4.42 | 4.64 | 5.73
-| [fastapi.0.114.0](https://pypi.org/project/fastapi.0.114.0/) `` | 26262 | 4.35 | 4.53 | 6.65
-| [fastapi.0.114.1](https://pypi.org/project/fastapi.0.114.1/) `` | 26483 | 4.27 | 4.58 | 6.67
-| [fastapi.0.114.2](https://pypi.org/project/fastapi.0.114.2/) `` | 26224 | 4.33 | 4.58 | 6.92
-| [fastapi.0.115.0](https://pypi.org/project/fastapi.0.115.0/) `` | 26217 | 4.34 | 4.56 | 6.34
-| [fastapi.0.115.1](https://pypi.org/project/fastapi.0.115.1/) `` | 25941 | 4.36 | 4.69 | 5.81
-| [fastapi.0.115.10](https://pypi.org/project/fastapi.0.115.10/) `` | 30741 | 3.66 | 4.01 | 6.08
-| [fastapi.0.115.11](https://pypi.org/project/fastapi.0.115.11/) `` | 31326 | 3.67 | 3.84 | 4.49
-| [fastapi.0.115.12](https://pypi.org/project/fastapi.0.115.12/) `` | 31548 | 3.58 | 3.80 | 5.62
-| [fastapi.0.115.13](https://pypi.org/project/fastapi.0.115.13/) `` | 31461 | 3.56 | 3.88 | 5.36
-| [fastapi.0.115.14](https://pypi.org/project/fastapi.0.115.14/) `` | 31705 | 3.58 | 3.79 | 5.08
-| [fastapi.0.115.2](https://pypi.org/project/fastapi.0.115.2/) `` | 30905 | 3.63 | 4.07 | 5.58
-| [fastapi.0.115.3](https://pypi.org/project/fastapi.0.115.3/) `` | 30812 | 3.62 | 4.16 | 5.57
-| [fastapi.0.115.4](https://pypi.org/project/fastapi.0.115.4/) `` | 31639 | 3.61 | 3.78 | 4.35
-| [fastapi.0.115.5](https://pypi.org/project/fastapi.0.115.5/) `` | 31118 | 3.65 | 3.90 | 5.35
-| [fastapi.0.115.6](https://pypi.org/project/fastapi.0.115.6/) `` | 31471 | 3.56 | 3.92 | 5.97
-| [fastapi.0.115.7](https://pypi.org/project/fastapi.0.115.7/) `` | 31740 | 3.61 | 3.76 | 4.36
-| [fastapi.0.115.8](https://pypi.org/project/fastapi.0.115.8/) `` | 31534 | 3.59 | 3.83 | 5.45
-| [fastapi.0.115.9](https://pypi.org/project/fastapi.0.115.9/) `` | 30831 | 3.70 | 3.96 | 5.26
-| [fastapi.0.116.0](https://pypi.org/project/fastapi.0.116.0/) `` | 31319 | 3.64 | 3.89 | 4.49
-| [fastapi.0.116.1](https://pypi.org/project/fastapi.0.116.1/) `` | 31375 | 3.63 | 3.87 | 4.45
-| [fastapi.0.116.2](https://pypi.org/project/fastapi.0.116.2/) `` | 30958 | 3.69 | 3.87 | 4.51
-| [fastapi.0.117.0](https://pypi.org/project/fastapi.0.117.0/) `` | 31488 | 3.58 | 3.93 | 4.95
-| [fastapi.0.117.1](https://pypi.org/project/fastapi.0.117.1/) `` | 31215 | 3.63 | 3.94 | 4.71
-| [fastapi.0.51.0](https://pypi.org/project/fastapi.0.51.0/) `` | 37714 | 3.00 | 3.23 | 3.78
-| [fastapi.0.52.0](https://pypi.org/project/fastapi.0.52.0/) `` | 37687 | 3.01 | 3.31 | 3.47
-| [fastapi.0.53.0](https://pypi.org/project/fastapi.0.53.0/) `` | 37834 | 2.99 | 3.26 | 3.51
-| [fastapi.0.53.1](https://pypi.org/project/fastapi.0.53.1/) `` | 36801 | 3.12 | 3.29 | 3.67
-| [fastapi.0.53.2](https://pypi.org/project/fastapi.0.53.2/) `` | 36960 | 3.08 | 3.34 | 3.51
-| [fastapi.0.54.0](https://pypi.org/project/fastapi.0.54.0/) `` | 37583 | 3.01 | 3.38 | 3.49
-| [fastapi.0.54.1](https://pypi.org/project/fastapi.0.54.1/) `` | 37747 | 2.99 | 3.19 | 4.27
-| [fastapi.0.54.2](https://pypi.org/project/fastapi.0.54.2/) `` | 37575 | 3.02 | 3.36 | 3.45
-| [fastapi.0.55.0](https://pypi.org/project/fastapi.0.55.0/) `` | 37905 | 3.00 | 3.25 | 3.45
-| [fastapi.0.55.1](https://pypi.org/project/fastapi.0.55.1/) `` | 37999 | 2.99 | 3.23 | 3.43
-| [fastapi.0.56.0](https://pypi.org/project/fastapi.0.56.0/) `` | 37566 | 3.01 | 3.32 | 3.49
-| [fastapi.0.56.1](https://pypi.org/project/fastapi.0.56.1/) `` | 37647 | 2.99 | 3.33 | 3.97
-| [fastapi.0.57.0](https://pypi.org/project/fastapi.0.57.0/) `` | 37499 | 2.97 | 3.37 | 5.03
-| [fastapi.0.58.0](https://pypi.org/project/fastapi.0.58.0/) `` | 37743 | 3.00 | 3.26 | 3.49
-| [fastapi.0.58.1](https://pypi.org/project/fastapi.0.58.1/) `` | 37868 | 2.99 | 3.24 | 3.56
-| [fastapi.0.59.0](https://pypi.org/project/fastapi.0.59.0/) `` | 37999 | 3.00 | 3.21 | 3.42
-| [fastapi.0.60.0](https://pypi.org/project/fastapi.0.60.0/) `` | 37953 | 2.99 | 3.22 | 3.44
-| [fastapi.0.60.1](https://pypi.org/project/fastapi.0.60.1/) `` | 37074 | 3.07 | 3.30 | 3.64
-| [fastapi.0.60.2](https://pypi.org/project/fastapi.0.60.2/) `` | 37422 | 3.00 | 3.33 | 6.39
-| [fastapi.0.61.0](https://pypi.org/project/fastapi.0.61.0/) `` | 37718 | 3.02 | 3.24 | 3.47
-| [fastapi.0.61.1](https://pypi.org/project/fastapi.0.61.1/) `` | 37128 | 3.03 | 3.31 | 5.07
-| [fastapi.0.61.2](https://pypi.org/project/fastapi.0.61.2/) `` | 38124 | 3.01 | 3.15 | 3.39
-| [fastapi.0.62.0](https://pypi.org/project/fastapi.0.62.0/) `` | 38307 | 2.98 | 3.15 | 3.98
-| [fastapi.0.63.0](https://pypi.org/project/fastapi.0.63.0/) `` | 38276 | 2.99 | 3.18 | 3.41
-| [fastapi.0.64.0](https://pypi.org/project/fastapi.0.64.0/) `` | 37367 | 3.05 | 3.28 | 3.48
-| [fastapi.0.65.0](https://pypi.org/project/fastapi.0.65.0/) `` | 38620 | 2.96 | 3.13 | 3.35
-| [fastapi.0.65.1](https://pypi.org/project/fastapi.0.65.1/) `` | 37615 | 3.06 | 3.18 | 5.29
-| [fastapi.0.65.2](https://pypi.org/project/fastapi.0.65.2/) `` | 38177 | 3.00 | 3.15 | 3.39
-| [fastapi.0.65.3](https://pypi.org/project/fastapi.0.65.3/) `` | 38169 | 3.00 | 3.19 | 3.40
-| [fastapi.0.66.0](https://pypi.org/project/fastapi.0.66.0/) `` | 38296 | 2.99 | 3.10 | 3.39
-| [fastapi.0.66.1](https://pypi.org/project/fastapi.0.66.1/) `` | 37800 | 3.03 | 3.17 | 3.43
-| [fastapi.0.67.0](https://pypi.org/project/fastapi.0.67.0/) `` | 38126 | 3.00 | 3.17 | 3.39
-| [fastapi.0.68.0](https://pypi.org/project/fastapi.0.68.0/) `` | 37716 | 3.05 | 3.20 | 3.44
-| [fastapi.0.68.1](https://pypi.org/project/fastapi.0.68.1/) `` | 38682 | 2.96 | 3.08 | 3.36
-| [fastapi.0.68.2](https://pypi.org/project/fastapi.0.68.2/) `` | 38362 | 3.00 | 3.09 | 3.43
-| [fastapi.0.69.0](https://pypi.org/project/fastapi.0.69.0/) `` | 38417 | 2.98 | 3.13 | 3.40
-| [fastapi.0.70.0](https://pypi.org/project/fastapi.0.70.0/) `` | 37454 | 3.08 | 3.22 | 3.46
-| [fastapi.0.70.1](https://pypi.org/project/fastapi.0.70.1/) `` | 38526 | 2.98 | 3.12 | 3.35
-| [fastapi.0.71.0](https://pypi.org/project/fastapi.0.71.0/) `` | 37618 | 3.04 | 3.22 | 3.48
-| [fastapi.0.72.0](https://pypi.org/project/fastapi.0.72.0/) `` | 37808 | 3.04 | 3.19 | 3.42
-| [fastapi.0.73.0](https://pypi.org/project/fastapi.0.73.0/) `` | 37615 | 3.02 | 3.17 | 4.96
-| [fastapi.0.74.0](https://pypi.org/project/fastapi.0.74.0/) `` | 38563 | 2.98 | 3.08 | 3.36
-| [fastapi.0.74.1](https://pypi.org/project/fastapi.0.74.1/) `` | 35939 | 3.19 | 3.36 | 3.63
-| [fastapi.0.75.0](https://pypi.org/project/fastapi.0.75.0/) `` | 36630 | 3.13 | 3.25 | 3.55
-| [fastapi.0.75.1](https://pypi.org/project/fastapi.0.75.1/) `` | 36826 | 3.11 | 3.27 | 3.50
-| [fastapi.0.75.2](https://pypi.org/project/fastapi.0.75.2/) `` | 37173 | 3.08 | 3.21 | 3.52
-| [fastapi.0.76.0](https://pypi.org/project/fastapi.0.76.0/) `` | 34681 | 3.33 | 3.46 | 3.76
-| [fastapi.0.77.0](https://pypi.org/project/fastapi.0.77.0/) `` | 35553 | 3.24 | 3.33 | 3.63
-| [fastapi.0.77.1](https://pypi.org/project/fastapi.0.77.1/) `` | 35307 | 3.24 | 3.37 | 3.66
-| [fastapi.0.78.0](https://pypi.org/project/fastapi.0.78.0/) `` | 34352 | 3.31 | 3.53 | 3.77
-| [fastapi.0.79.0](https://pypi.org/project/fastapi.0.79.0/) `` | 34508 | 3.29 | 3.56 | 3.75
-| [fastapi.0.79.1](https://pypi.org/project/fastapi.0.79.1/) `` | 34519 | 3.30 | 3.55 | 3.78
-| [fastapi.0.80.0](https://pypi.org/project/fastapi.0.80.0/) `` | 34388 | 3.31 | 3.53 | 3.76
-| [fastapi.0.81.0](https://pypi.org/project/fastapi.0.81.0/) `` | 34638 | 3.30 | 3.52 | 3.75
-| [fastapi.0.82.0](https://pypi.org/project/fastapi.0.82.0/) `` | 34380 | 3.28 | 3.62 | 3.76
-| [fastapi.0.83.0](https://pypi.org/project/fastapi.0.83.0/) `` | 34460 | 3.26 | 3.75 | 3.75
-| [fastapi.0.84.0](https://pypi.org/project/fastapi.0.84.0/) `` | 34380 | 3.30 | 3.60 | 3.83
-| [fastapi.0.85.0](https://pypi.org/project/fastapi.0.85.0/) `` | 35014 | 3.25 | 3.52 | 3.72
-| [fastapi.0.85.1](https://pypi.org/project/fastapi.0.85.1/) `` | 34150 | 3.34 | 3.50 | 5.79
-| [fastapi.0.85.2](https://pypi.org/project/fastapi.0.85.2/) `` | 34470 | 3.30 | 3.54 | 3.78
-| [fastapi.0.86.0](https://pypi.org/project/fastapi.0.86.0/) `` | 33935 | 3.32 | 3.59 | 6.51
-| [fastapi.0.87.0](https://pypi.org/project/fastapi.0.87.0/) `` | 34471 | 3.30 | 3.57 | 3.74
-| [fastapi.0.88.0](https://pypi.org/project/fastapi.0.88.0/) `` | 34399 | 3.31 | 3.54 | 3.82
-| [fastapi.0.89.0](https://pypi.org/project/fastapi.0.89.0/) `` | 35248 | 3.23 | 3.45 | 3.72
-| [fastapi.0.89.1](https://pypi.org/project/fastapi.0.89.1/) `` | 34029 | 3.36 | 3.65 | 3.82
-| [fastapi.0.90.0](https://pypi.org/project/fastapi.0.90.0/) `` | 34549 | 3.28 | 3.49 | 3.74
-| [fastapi.0.90.1](https://pypi.org/project/fastapi.0.90.1/) `` | 34284 | 3.30 | 3.58 | 3.81
-| [fastapi.0.91.0](https://pypi.org/project/fastapi.0.91.0/) `` | 34582 | 3.27 | 3.60 | 3.75
-| [fastapi.0.92.0](https://pypi.org/project/fastapi.0.92.0/) `` | 34549 | 3.29 | 3.54 | 3.73
-| [fastapi.0.93.0](https://pypi.org/project/fastapi.0.93.0/) `` | 33901 | 3.37 | 3.64 | 3.85
-| [fastapi.0.94.0](https://pypi.org/project/fastapi.0.94.0/) `` | 34235 | 3.31 | 3.62 | 3.88
-| [fastapi.0.94.1](https://pypi.org/project/fastapi.0.94.1/) `` | 34017 | 3.32 | 3.62 | 3.85
-| [fastapi.0.95.0](https://pypi.org/project/fastapi.0.95.0/) `` | 34358 | 3.29 | 3.66 | 3.79
-| [fastapi.0.95.1](https://pypi.org/project/fastapi.0.95.1/) `` | 34278 | 3.31 | 3.56 | 3.80
-| [fastapi.0.95.2](https://pypi.org/project/fastapi.0.95.2/) `` | 34524 | 3.29 | 3.54 | 3.76
-| [fastapi.0.96.0](https://pypi.org/project/fastapi.0.96.0/) `` | 33859 | 3.40 | 3.56 | 3.84
-| [fastapi.0.96.1](https://pypi.org/project/fastapi.0.96.1/) `` | 34479 | 3.27 | 3.49 | 6.03
-| [fastapi.0.97.0](https://pypi.org/project/fastapi.0.97.0/) `` | 34700 | 3.25 | 3.61 | 3.75
-| [fastapi.0.98.0](https://pypi.org/project/fastapi.0.98.0/) `` | 34047 | 3.33 | 3.71 | 3.83
-| [fastapi.0.99.0](https://pypi.org/project/fastapi.0.99.0/) `` | 34650 | 3.26 | 3.66 | 3.75
-| [fastapi.0.99.1](https://pypi.org/project/fastapi.0.99.1/) `` | 33353 | 3.29 | 3.82 | 7.31
+### Docker
 
+Each framework version runs inside an isolated Docker container, ensuring reproducibility and preventing cross-environment interference. The `hey` load generator itself is also containerized, using the [`vinixnan/hey:0.1.4`](https://hub.docker.com/layers/vinixnan/hey/0.1.4/images/) image.
 
-</details>
+```sh
+# Build the base image
+docker build . -t benchbase:latest
+```
 
-<h3 id="api"> Parse path params, query string, JSON body and return a json response</h3>
-<details open>
-<summary> The test simulates a simple JSON REST API endpoint.  </summary>
+### Automated Pipeline
 
-Sorted by max req/s
+The project includes an automated pipeline that:
 
-| Framework | Requests/sec | Latency 50% (ms) | Latency 75% (ms) | Latency Avg (ms) |
-| --------- | -----------: | ---------------: | ---------------: | ---------------: |
-| [fastapi.0.100.0](https://pypi.org/project/fastapi.0.100.0/) `` | 21643 | 5.30 | 5.58 | 5.97
-| [fastapi.0.100.1](https://pypi.org/project/fastapi.0.100.1/) `` | 21347 | 5.38 | 5.64 | 6.05
-| [fastapi.0.101.0](https://pypi.org/project/fastapi.0.101.0/) `` | 21572 | 5.27 | 5.68 | 6.00
-| [fastapi.0.101.1](https://pypi.org/project/fastapi.0.101.1/) `` | 21306 | 5.35 | 5.71 | 6.07
-| [fastapi.0.102.0](https://pypi.org/project/fastapi.0.102.0/) `` | 21613 | 5.32 | 5.60 | 5.97
-| [fastapi.0.103.0](https://pypi.org/project/fastapi.0.103.0/) `` | 21587 | 5.28 | 5.61 | 5.98
-| [fastapi.0.103.1](https://pypi.org/project/fastapi.0.103.1/) `` | 21467 | 5.34 | 5.64 | 6.02
-| [fastapi.0.103.2](https://pypi.org/project/fastapi.0.103.2/) `` | 21495 | 5.33 | 5.63 | 6.02
-| [fastapi.0.104.0](https://pypi.org/project/fastapi.0.104.0/) `` | 21715 | 5.30 | 5.55 | 5.96
-| [fastapi.0.104.1](https://pypi.org/project/fastapi.0.104.1/) `` | 21549 | 5.31 | 5.66 | 6.01
-| [fastapi.0.105.0](https://pypi.org/project/fastapi.0.105.0/) `` | 21600 | 5.31 | 5.59 | 5.98
-| [fastapi.0.106.0](https://pypi.org/project/fastapi.0.106.0/) `` | 21445 | 5.33 | 5.67 | 6.02
-| [fastapi.0.107.0](https://pypi.org/project/fastapi.0.107.0/) `` | 20783 | 5.54 | 5.80 | 6.22
-| [fastapi.0.108.0](https://pypi.org/project/fastapi.0.108.0/) `` | 20509 | 5.57 | 5.99 | 6.31
-| [fastapi.0.109.0](https://pypi.org/project/fastapi.0.109.0/) `` | 18129 | 6.34 | 6.62 | 7.15
-| [fastapi.0.109.1](https://pypi.org/project/fastapi.0.109.1/) `` | 17994 | 6.36 | 6.85 | 7.12
-| [fastapi.0.109.2](https://pypi.org/project/fastapi.0.109.2/) `` | 18308 | 6.29 | 6.64 | 7.07
-| [fastapi.0.110.0](https://pypi.org/project/fastapi.0.110.0/) `` | 18155 | 6.34 | 6.62 | 7.13
-| [fastapi.0.110.1](https://pypi.org/project/fastapi.0.110.1/) `` | 18066 | 6.32 | 6.75 | 7.18
-| [fastapi.0.110.2](https://pypi.org/project/fastapi.0.110.2/) `` | 18055 | 6.35 | 6.76 | 7.17
-| [fastapi.0.110.3](https://pypi.org/project/fastapi.0.110.3/) `` | 18246 | 6.31 | 6.59 | 7.09
-| [fastapi.0.110.3.dev1](https://pypi.org/project/fastapi.0.110.3.dev1/) `` | 18203 | 6.29 | 6.63 | 7.11
-| [fastapi.0.110.3.dev2](https://pypi.org/project/fastapi.0.110.3.dev2/) `` | 18195 | 6.33 | 6.61 | 7.13
-| [fastapi.0.111.0](https://pypi.org/project/fastapi.0.111.0/) `` | 18121 | 6.34 | 6.67 | 7.15
-| [fastapi.0.111.0.dev1](https://pypi.org/project/fastapi.0.111.0.dev1/) `` | 18034 | 6.36 | 6.75 | 7.18
-| [fastapi.0.111.1](https://pypi.org/project/fastapi.0.111.1/) `` | 18038 | 6.36 | 6.68 | 7.18
-| [fastapi.0.112.0](https://pypi.org/project/fastapi.0.112.0/) `` | 18028 | 6.37 | 6.74 | 7.19
-| [fastapi.0.112.1](https://pypi.org/project/fastapi.0.112.1/) `` | 17854 | 6.49 | 6.75 | 7.27
-| [fastapi.0.112.2](https://pypi.org/project/fastapi.0.112.2/) `` | 18209 | 6.28 | 6.69 | 7.11
-| [fastapi.0.112.3](https://pypi.org/project/fastapi.0.112.3/) `` | 18054 | 6.34 | 6.73 | 7.18
-| [fastapi.0.112.4](https://pypi.org/project/fastapi.0.112.4/) `` | 17091 | 6.70 | 7.08 | 7.59
-| [fastapi.0.113.0](https://pypi.org/project/fastapi.0.113.0/) `` | 17049 | 6.78 | 7.00 | 7.59
-| [fastapi.0.114.0](https://pypi.org/project/fastapi.0.114.0/) `` | 17027 | 6.78 | 7.12 | 7.62
-| [fastapi.0.114.1](https://pypi.org/project/fastapi.0.114.1/) `` | 17239 | 6.62 | 7.04 | 7.53
-| [fastapi.0.114.2](https://pypi.org/project/fastapi.0.114.2/) `` | 17034 | 6.69 | 7.11 | 7.61
-| [fastapi.0.115.0](https://pypi.org/project/fastapi.0.115.0/) `` | 15804 | 7.27 | 7.63 | 8.21
-| [fastapi.0.115.1](https://pypi.org/project/fastapi.0.115.1/) `` | 15730 | 7.32 | 7.76 | 8.25
-| [fastapi.0.115.10](https://pypi.org/project/fastapi.0.115.10/) `` | 17793 | 6.42 | 6.72 | 7.29
-| [fastapi.0.115.11](https://pypi.org/project/fastapi.0.115.11/) `` | 17743 | 6.49 | 6.83 | 7.30
-| [fastapi.0.115.12](https://pypi.org/project/fastapi.0.115.12/) `` | 17765 | 6.49 | 6.76 | 7.28
-| [fastapi.0.115.13](https://pypi.org/project/fastapi.0.115.13/) `` | 17966 | 6.38 | 6.79 | 7.21
-| [fastapi.0.115.14](https://pypi.org/project/fastapi.0.115.14/) `` | 18091 | 6.36 | 6.61 | 7.16
-| [fastapi.0.115.2](https://pypi.org/project/fastapi.0.115.2/) `` | 17895 | 6.47 | 6.71 | 7.23
-| [fastapi.0.115.3](https://pypi.org/project/fastapi.0.115.3/) `` | 17772 | 6.40 | 6.78 | 7.27
-| [fastapi.0.115.4](https://pypi.org/project/fastapi.0.115.4/) `` | 17991 | 6.42 | 6.65 | 7.19
-| [fastapi.0.115.5](https://pypi.org/project/fastapi.0.115.5/) `` | 17893 | 6.45 | 6.77 | 7.24
-| [fastapi.0.115.6](https://pypi.org/project/fastapi.0.115.6/) `` | 17748 | 6.46 | 6.95 | 7.30
-| [fastapi.0.115.7](https://pypi.org/project/fastapi.0.115.7/) `` | 17594 | 6.54 | 6.90 | 7.38
-| [fastapi.0.115.8](https://pypi.org/project/fastapi.0.115.8/) `` | 18064 | 6.36 | 6.61 | 7.12
-| [fastapi.0.115.9](https://pypi.org/project/fastapi.0.115.9/) `` | 17597 | 6.56 | 6.88 | 7.35
-| [fastapi.0.116.0](https://pypi.org/project/fastapi.0.116.0/) `` | 17987 | 6.38 | 6.75 | 7.19
-| [fastapi.0.116.1](https://pypi.org/project/fastapi.0.116.1/) `` | 17708 | 6.52 | 6.80 | 7.31
-| [fastapi.0.116.2](https://pypi.org/project/fastapi.0.116.2/) `` | 17711 | 6.50 | 6.81 | 7.32
-| [fastapi.0.117.0](https://pypi.org/project/fastapi.0.117.0/) `` | 18049 | 6.37 | 6.67 | 7.19
-| [fastapi.0.117.1](https://pypi.org/project/fastapi.0.117.1/) `` | 17876 | 6.43 | 6.74 | 7.26
-| [fastapi.0.51.0](https://pypi.org/project/fastapi.0.51.0/) `` | 24111 | 4.77 | 5.04 | 5.36
-| [fastapi.0.52.0](https://pypi.org/project/fastapi.0.52.0/) `` | 24092 | 4.77 | 5.02 | 5.36
-| [fastapi.0.53.0](https://pypi.org/project/fastapi.0.53.0/) `` | 24640 | 4.65 | 4.87 | 5.24
-| [fastapi.0.53.1](https://pypi.org/project/fastapi.0.53.1/) `` | 23774 | 4.88 | 5.07 | 5.42
-| [fastapi.0.53.2](https://pypi.org/project/fastapi.0.53.2/) `` | 24193 | 4.72 | 5.01 | 5.33
-| [fastapi.0.54.0](https://pypi.org/project/fastapi.0.54.0/) `` | 24055 | 4.75 | 5.06 | 5.36
-| [fastapi.0.54.1](https://pypi.org/project/fastapi.0.54.1/) `` | 24356 | 4.70 | 4.97 | 5.29
-| [fastapi.0.54.2](https://pypi.org/project/fastapi.0.54.2/) `` | 24081 | 4.77 | 5.05 | 5.37
-| [fastapi.0.55.0](https://pypi.org/project/fastapi.0.55.0/) `` | 24052 | 4.76 | 5.03 | 5.37
-| [fastapi.0.55.1](https://pypi.org/project/fastapi.0.55.1/) `` | 24096 | 4.75 | 5.01 | 5.36
-| [fastapi.0.56.0](https://pypi.org/project/fastapi.0.56.0/) `` | 24293 | 4.73 | 4.97 | 5.32
-| [fastapi.0.56.1](https://pypi.org/project/fastapi.0.56.1/) `` | 24284 | 4.71 | 4.98 | 5.31
-| [fastapi.0.57.0](https://pypi.org/project/fastapi.0.57.0/) `` | 24076 | 4.75 | 5.03 | 5.36
-| [fastapi.0.58.0](https://pypi.org/project/fastapi.0.58.0/) `` | 23971 | 4.77 | 5.08 | 5.40
-| [fastapi.0.58.1](https://pypi.org/project/fastapi.0.58.1/) `` | 24283 | 4.75 | 4.96 | 5.32
-| [fastapi.0.59.0](https://pypi.org/project/fastapi.0.59.0/) `` | 24255 | 4.70 | 5.05 | 5.32
-| [fastapi.0.60.0](https://pypi.org/project/fastapi.0.60.0/) `` | 24136 | 4.72 | 5.04 | 5.36
-| [fastapi.0.60.1](https://pypi.org/project/fastapi.0.60.1/) `` | 23709 | 4.84 | 5.11 | 5.45
-| [fastapi.0.60.2](https://pypi.org/project/fastapi.0.60.2/) `` | 24367 | 4.71 | 4.95 | 5.30
-| [fastapi.0.61.0](https://pypi.org/project/fastapi.0.61.0/) `` | 24137 | 4.75 | 5.01 | 5.36
-| [fastapi.0.61.1](https://pypi.org/project/fastapi.0.61.1/) `` | 24309 | 4.73 | 4.92 | 5.30
-| [fastapi.0.61.2](https://pypi.org/project/fastapi.0.61.2/) `` | 24255 | 4.73 | 4.97 | 5.32
-| [fastapi.0.62.0](https://pypi.org/project/fastapi.0.62.0/) `` | 24829 | 4.65 | 4.86 | 5.21
-| [fastapi.0.63.0](https://pypi.org/project/fastapi.0.63.0/) `` | 24951 | 4.63 | 4.81 | 5.17
-| [fastapi.0.64.0](https://pypi.org/project/fastapi.0.64.0/) `` | 24355 | 4.75 | 4.93 | 5.28
-| [fastapi.0.65.0](https://pypi.org/project/fastapi.0.65.0/) `` | 24774 | 4.64 | 4.86 | 5.22
-| [fastapi.0.65.1](https://pypi.org/project/fastapi.0.65.1/) `` | 24582 | 4.72 | 4.89 | 5.26
-| [fastapi.0.65.2](https://pypi.org/project/fastapi.0.65.2/) `` | 24647 | 4.67 | 4.85 | 5.23
-| [fastapi.0.65.3](https://pypi.org/project/fastapi.0.65.3/) `` | 24643 | 4.67 | 4.87 | 5.24
-| [fastapi.0.66.0](https://pypi.org/project/fastapi.0.66.0/) `` | 24242 | 4.80 | 4.97 | 5.33
-| [fastapi.0.66.1](https://pypi.org/project/fastapi.0.66.1/) `` | 24480 | 4.72 | 4.88 | 5.27
-| [fastapi.0.67.0](https://pypi.org/project/fastapi.0.67.0/) `` | 24463 | 4.74 | 4.92 | 5.28
-| [fastapi.0.68.0](https://pypi.org/project/fastapi.0.68.0/) `` | 24408 | 4.73 | 4.96 | 5.29
-| [fastapi.0.68.1](https://pypi.org/project/fastapi.0.68.1/) `` | 24528 | 4.70 | 4.85 | 5.26
-| [fastapi.0.68.2](https://pypi.org/project/fastapi.0.68.2/) `` | 24421 | 4.75 | 4.88 | 5.29
-| [fastapi.0.69.0](https://pypi.org/project/fastapi.0.69.0/) `` | 24576 | 4.66 | 4.89 | 5.25
-| [fastapi.0.70.0](https://pypi.org/project/fastapi.0.70.0/) `` | 24015 | 4.84 | 5.01 | 5.38
-| [fastapi.0.70.1](https://pypi.org/project/fastapi.0.70.1/) `` | 24761 | 4.66 | 4.84 | 5.21
-| [fastapi.0.71.0](https://pypi.org/project/fastapi.0.71.0/) `` | 24295 | 4.74 | 4.96 | 5.31
-| [fastapi.0.72.0](https://pypi.org/project/fastapi.0.72.0/) `` | 24270 | 4.75 | 4.97 | 5.31
-| [fastapi.0.73.0](https://pypi.org/project/fastapi.0.73.0/) `` | 24502 | 4.70 | 4.88 | 5.27
-| [fastapi.0.74.0](https://pypi.org/project/fastapi.0.74.0/) `` | 24712 | 4.66 | 4.81 | 5.23
-| [fastapi.0.74.1](https://pypi.org/project/fastapi.0.74.1/) `` | 23480 | 4.93 | 5.17 | 5.49
-| [fastapi.0.75.0](https://pypi.org/project/fastapi.0.75.0/) `` | 23790 | 4.84 | 5.03 | 5.43
-| [fastapi.0.75.1](https://pypi.org/project/fastapi.0.75.1/) `` | 23699 | 4.87 | 5.07 | 5.46
-| [fastapi.0.75.2](https://pypi.org/project/fastapi.0.75.2/) `` | 24241 | 4.77 | 4.89 | 5.34
-| [fastapi.0.76.0](https://pypi.org/project/fastapi.0.76.0/) `` | 22713 | 5.11 | 5.30 | 5.70
-| [fastapi.0.77.0](https://pypi.org/project/fastapi.0.77.0/) `` | 23268 | 4.98 | 5.13 | 5.54
-| [fastapi.0.77.1](https://pypi.org/project/fastapi.0.77.1/) `` | 23127 | 5.00 | 5.14 | 5.58
-| [fastapi.0.78.0](https://pypi.org/project/fastapi.0.78.0/) `` | 22840 | 5.06 | 5.26 | 5.66
-| [fastapi.0.79.0](https://pypi.org/project/fastapi.0.79.0/) `` | 22690 | 5.02 | 5.44 | 5.69
-| [fastapi.0.79.1](https://pypi.org/project/fastapi.0.79.1/) `` | 22500 | 5.08 | 5.44 | 5.74
-| [fastapi.0.80.0](https://pypi.org/project/fastapi.0.80.0/) `` | 23039 | 4.99 | 5.18 | 5.60
-| [fastapi.0.81.0](https://pypi.org/project/fastapi.0.81.0/) `` | 22914 | 4.99 | 5.34 | 5.64
-| [fastapi.0.82.0](https://pypi.org/project/fastapi.0.82.0/) `` | 22708 | 5.04 | 5.34 | 5.69
-| [fastapi.0.83.0](https://pypi.org/project/fastapi.0.83.0/) `` | 22975 | 5.00 | 5.24 | 5.62
-| [fastapi.0.84.0](https://pypi.org/project/fastapi.0.84.0/) `` | 22974 | 5.00 | 5.28 | 5.63
-| [fastapi.0.85.0](https://pypi.org/project/fastapi.0.85.0/) `` | 22756 | 5.04 | 5.33 | 5.66
-| [fastapi.0.85.1](https://pypi.org/project/fastapi.0.85.1/) `` | 22519 | 5.17 | 5.40 | 5.73
-| [fastapi.0.85.2](https://pypi.org/project/fastapi.0.85.2/) `` | 22221 | 5.17 | 5.50 | 5.80
-| [fastapi.0.86.0](https://pypi.org/project/fastapi.0.86.0/) `` | 22625 | 5.04 | 5.36 | 5.71
-| [fastapi.0.87.0](https://pypi.org/project/fastapi.0.87.0/) `` | 22594 | 5.09 | 5.36 | 5.72
-| [fastapi.0.88.0](https://pypi.org/project/fastapi.0.88.0/) `` | 22711 | 5.04 | 5.34 | 5.69
-| [fastapi.0.89.0](https://pypi.org/project/fastapi.0.89.0/) `` | 22970 | 4.97 | 5.26 | 5.62
-| [fastapi.0.89.1](https://pypi.org/project/fastapi.0.89.1/) `` | 22836 | 5.02 | 5.29 | 5.66
-| [fastapi.0.90.0](https://pypi.org/project/fastapi.0.90.0/) `` | 22650 | 5.09 | 5.32 | 5.69
-| [fastapi.0.90.1](https://pypi.org/project/fastapi.0.90.1/) `` | 22882 | 5.07 | 5.27 | 5.64
-| [fastapi.0.91.0](https://pypi.org/project/fastapi.0.91.0/) `` | 22980 | 5.00 | 5.23 | 5.62
-| [fastapi.0.92.0](https://pypi.org/project/fastapi.0.92.0/) `` | 22891 | 5.02 | 5.27 | 5.65
-| [fastapi.0.93.0](https://pypi.org/project/fastapi.0.93.0/) `` | 22525 | 5.13 | 5.34 | 5.73
-| [fastapi.0.94.0](https://pypi.org/project/fastapi.0.94.0/) `` | 22575 | 5.08 | 5.37 | 5.72
-| [fastapi.0.94.1](https://pypi.org/project/fastapi.0.94.1/) `` | 22705 | 5.08 | 5.34 | 5.69
-| [fastapi.0.95.0](https://pypi.org/project/fastapi.0.95.0/) `` | 23009 | 4.98 | 5.19 | 5.61
-| [fastapi.0.95.1](https://pypi.org/project/fastapi.0.95.1/) `` | 22588 | 5.08 | 5.37 | 5.73
-| [fastapi.0.95.2](https://pypi.org/project/fastapi.0.95.2/) `` | 22830 | 5.00 | 5.32 | 5.65
-| [fastapi.0.96.0](https://pypi.org/project/fastapi.0.96.0/) `` | 22470 | 5.11 | 5.37 | 5.75
-| [fastapi.0.96.1](https://pypi.org/project/fastapi.0.96.1/) `` | 22720 | 5.03 | 5.47 | 5.67
-| [fastapi.0.97.0](https://pypi.org/project/fastapi.0.97.0/) `` | 22817 | 4.97 | 5.26 | 5.66
-| [fastapi.0.98.0](https://pypi.org/project/fastapi.0.98.0/) `` | 22601 | 5.06 | 5.36 | 5.71
-| [fastapi.0.99.0](https://pypi.org/project/fastapi.0.99.0/) `` | 22774 | 5.03 | 5.29 | 5.68
-| [fastapi.0.99.1](https://pypi.org/project/fastapi.0.99.1/) `` | 22955 | 5.01 | 5.22 | 5.64
+- **Discovers and filters** available versions of each framework from PyPI
+- **Builds** a dedicated Docker image for each version on demand
+- **Validates** each image with a quick functional test before committing it to the benchmark
+- **Caches** previously built and validated images to avoid redundant rebuilds across runs
+- **Executes** the benchmark for a configurable number of rounds per version
+- **Collects** both HTTP performance metrics and energy consumption data (via [CodeCarbon](https://docs.codecarbon.io/latest/))
 
-</details>
+---
 
-<h3 id="upload"> Parse uploaded file, store it on disk and return a text response</h3>
-<details open>
-<summary> The test simulates multipart formdata processing and work with files.  </summary>
+## How to Run
 
-Sorted by max req/s
+### Recommended Workflow
 
-| Framework | Requests/sec | Latency 50% (ms) | Latency 75% (ms) | Latency Avg (ms) |
-| --------- | -----------: | ---------------: | ---------------: | ---------------: |
-| [fastapi.0.100.0](https://pypi.org/project/fastapi.0.100.0/) `` | 7103 | 16.28 | 16.81 | 18.57
-| [fastapi.0.100.1](https://pypi.org/project/fastapi.0.100.1/) `` | 7087 | 16.31 | 16.87 | 18.53
-| [fastapi.0.101.0](https://pypi.org/project/fastapi.0.101.0/) `` | 7073 | 16.31 | 17.02 | 18.59
-| [fastapi.0.101.1](https://pypi.org/project/fastapi.0.101.1/) `` | 7122 | 16.24 | 16.80 | 18.48
-| [fastapi.0.102.0](https://pypi.org/project/fastapi.0.102.0/) `` | 7078 | 16.32 | 16.97 | 18.64
-| [fastapi.0.103.0](https://pypi.org/project/fastapi.0.103.0/) `` | 7142 | 16.21 | 16.77 | 18.33
-| [fastapi.0.103.1](https://pypi.org/project/fastapi.0.103.1/) `` | 7139 | 16.11 | 16.67 | 18.49
-| [fastapi.0.103.2](https://pypi.org/project/fastapi.0.103.2/) `` | 7115 | 16.24 | 16.83 | 18.49
-| [fastapi.0.104.0](https://pypi.org/project/fastapi.0.104.0/) `` | 7110 | 16.27 | 16.85 | 18.55
-| [fastapi.0.104.1](https://pypi.org/project/fastapi.0.104.1/) `` | 7190 | 16.12 | 16.62 | 18.28
-| [fastapi.0.105.0](https://pypi.org/project/fastapi.0.105.0/) `` | 7189 | 16.09 | 16.59 | 18.33
-| [fastapi.0.106.0](https://pypi.org/project/fastapi.0.106.0/) `` | 7061 | 16.30 | 17.04 | 18.65
-| [fastapi.0.107.0](https://pypi.org/project/fastapi.0.107.0/) `` | 6969 | 16.57 | 17.17 | 18.95
-| [fastapi.0.108.0](https://pypi.org/project/fastapi.0.108.0/) `` | 7006 | 16.50 | 17.10 | 18.77
-| [fastapi.0.109.0](https://pypi.org/project/fastapi.0.109.0/) `` | 6761 | 17.13 | 17.63 | 19.47
-| [fastapi.0.109.1](https://pypi.org/project/fastapi.0.109.1/) `` | 6661 | 17.35 | 17.97 | 19.83
-| [fastapi.0.109.2](https://pypi.org/project/fastapi.0.109.2/) `` | 6757 | 17.05 | 17.68 | 19.50
-| [fastapi.0.110.0](https://pypi.org/project/fastapi.0.110.0/) `` | 6745 | 17.09 | 17.83 | 19.51
-| [fastapi.0.110.1](https://pypi.org/project/fastapi.0.110.1/) `` | 6686 | 17.33 | 17.97 | 19.69
-| [fastapi.0.110.2](https://pypi.org/project/fastapi.0.110.2/) `` | 6735 | 17.13 | 17.89 | 19.57
-| [fastapi.0.110.3](https://pypi.org/project/fastapi.0.110.3/) `` | 6693 | 17.25 | 17.95 | 19.75
-| [fastapi.0.110.3.dev1](https://pypi.org/project/fastapi.0.110.3.dev1/) `` | 6742 | 17.14 | 17.73 | 19.54
-| [fastapi.0.110.3.dev2](https://pypi.org/project/fastapi.0.110.3.dev2/) `` | 6641 | 17.42 | 18.04 | 19.87
-| [fastapi.0.111.0](https://pypi.org/project/fastapi.0.111.0/) `` | 6685 | 17.30 | 17.97 | 19.82
-| [fastapi.0.111.0.dev1](https://pypi.org/project/fastapi.0.111.0.dev1/) `` | 6667 | 17.32 | 17.96 | 19.80
-| [fastapi.0.111.1](https://pypi.org/project/fastapi.0.111.1/) `` | 6754 | 17.08 | 17.60 | 19.56
-| [fastapi.0.112.0](https://pypi.org/project/fastapi.0.112.0/) `` | 6744 | 17.15 | 17.73 | 19.57
-| [fastapi.0.112.1](https://pypi.org/project/fastapi.0.112.1/) `` | 6749 | 17.07 | 17.69 | 19.57
-| [fastapi.0.112.2](https://pypi.org/project/fastapi.0.112.2/) `` | 6748 | 17.11 | 17.75 | 19.54
-| [fastapi.0.112.3](https://pypi.org/project/fastapi.0.112.3/) `` | 6770 | 17.07 | 17.79 | 19.49
-| [fastapi.0.112.4](https://pypi.org/project/fastapi.0.112.4/) `` | 6727 | 17.18 | 17.77 | 19.59
-| [fastapi.0.113.0](https://pypi.org/project/fastapi.0.113.0/) `` | 6726 | 17.16 | 17.86 | 19.59
-| [fastapi.0.114.0](https://pypi.org/project/fastapi.0.114.0/) `` | 6745 | 17.10 | 17.76 | 19.55
-| [fastapi.0.114.1](https://pypi.org/project/fastapi.0.114.1/) `` | 6806 | 16.95 | 17.54 | 19.35
-| [fastapi.0.114.2](https://pypi.org/project/fastapi.0.114.2/) `` | 6763 | 17.08 | 17.86 | 19.49
-| [fastapi.0.115.0](https://pypi.org/project/fastapi.0.115.0/) `` | 6739 | 17.17 | 17.71 | 19.57
-| [fastapi.0.115.1](https://pypi.org/project/fastapi.0.115.1/) `` | 6742 | 17.15 | 17.86 | 19.57
-| [fastapi.0.115.10](https://pypi.org/project/fastapi.0.115.10/) `` | 7089 | 16.26 | 16.84 | 18.62
-| [fastapi.0.115.11](https://pypi.org/project/fastapi.0.115.11/) `` | 7084 | 16.28 | 16.96 | 18.55
-| [fastapi.0.115.12](https://pypi.org/project/fastapi.0.115.12/) `` | 7152 | 16.10 | 16.64 | 18.41
-| [fastapi.0.115.13](https://pypi.org/project/fastapi.0.115.13/) `` | 7199 | 15.94 | 16.58 | 18.31
-| [fastapi.0.115.14](https://pypi.org/project/fastapi.0.115.14/) `` | 7120 | 16.22 | 16.72 | 18.46
-| [fastapi.0.115.2](https://pypi.org/project/fastapi.0.115.2/) `` | 7101 | 16.09 | 16.85 | 18.54
-| [fastapi.0.115.3](https://pypi.org/project/fastapi.0.115.3/) `` | 7137 | 16.16 | 16.78 | 18.52
-| [fastapi.0.115.4](https://pypi.org/project/fastapi.0.115.4/) `` | 7166 | 16.03 | 16.81 | 18.41
-| [fastapi.0.115.5](https://pypi.org/project/fastapi.0.115.5/) `` | 7090 | 16.35 | 16.94 | 18.59
-| [fastapi.0.115.6](https://pypi.org/project/fastapi.0.115.6/) `` | 7187 | 16.09 | 16.64 | 18.34
-| [fastapi.0.115.7](https://pypi.org/project/fastapi.0.115.7/) `` | 7176 | 16.16 | 16.71 | 18.31
-| [fastapi.0.115.8](https://pypi.org/project/fastapi.0.115.8/) `` | 7217 | 16.05 | 16.50 | 18.27
-| [fastapi.0.115.9](https://pypi.org/project/fastapi.0.115.9/) `` | 7142 | 16.19 | 16.68 | 18.45
-| [fastapi.0.116.0](https://pypi.org/project/fastapi.0.116.0/) `` | 7184 | 16.11 | 16.63 | 18.35
-| [fastapi.0.116.1](https://pypi.org/project/fastapi.0.116.1/) `` | 7127 | 16.16 | 16.75 | 18.46
-| [fastapi.0.116.2](https://pypi.org/project/fastapi.0.116.2/) `` | 7197 | 16.11 | 16.66 | 18.28
-| [fastapi.0.117.0](https://pypi.org/project/fastapi.0.117.0/) `` | 7123 | 16.29 | 16.89 | 18.49
-| [fastapi.0.117.1](https://pypi.org/project/fastapi.0.117.1/) `` | 7217 | 15.95 | 16.54 | 18.21
-| [fastapi.0.51.0](https://pypi.org/project/fastapi.0.51.0/) `` | 5613 | 22.21 | 23.85 | 22.82
-| [fastapi.0.52.0](https://pypi.org/project/fastapi.0.52.0/) `` | 5631 | 22.06 | 23.66 | 22.75
-| [fastapi.0.53.0](https://pypi.org/project/fastapi.0.53.0/) `` | 5697 | 21.81 | 23.51 | 22.48
-| [fastapi.0.53.1](https://pypi.org/project/fastapi.0.53.1/) `` | 5621 | 22.16 | 23.76 | 22.78
-| [fastapi.0.53.2](https://pypi.org/project/fastapi.0.53.2/) `` | 5574 | 22.27 | 23.87 | 22.99
-| [fastapi.0.54.0](https://pypi.org/project/fastapi.0.54.0/) `` | 5688 | 21.87 | 23.51 | 22.52
-| [fastapi.0.54.1](https://pypi.org/project/fastapi.0.54.1/) `` | 5714 | 21.76 | 23.36 | 22.42
-| [fastapi.0.54.2](https://pypi.org/project/fastapi.0.54.2/) `` | 5686 | 21.83 | 23.47 | 22.53
-| [fastapi.0.55.0](https://pypi.org/project/fastapi.0.55.0/) `` | 5644 | 22.05 | 23.72 | 22.68
-| [fastapi.0.55.1](https://pypi.org/project/fastapi.0.55.1/) `` | 5726 | 21.65 | 23.27 | 22.38
-| [fastapi.0.56.0](https://pypi.org/project/fastapi.0.56.0/) `` | 5624 | 22.09 | 23.72 | 22.76
-| [fastapi.0.56.1](https://pypi.org/project/fastapi.0.56.1/) `` | 5680 | 21.88 | 23.48 | 22.55
-| [fastapi.0.57.0](https://pypi.org/project/fastapi.0.57.0/) `` | 5649 | 22.02 | 23.68 | 22.67
-| [fastapi.0.58.0](https://pypi.org/project/fastapi.0.58.0/) `` | 5659 | 21.92 | 23.51 | 22.63
-| [fastapi.0.58.1](https://pypi.org/project/fastapi.0.58.1/) `` | 5729 | 21.71 | 23.31 | 22.36
-| [fastapi.0.59.0](https://pypi.org/project/fastapi.0.59.0/) `` | 5637 | 22.00 | 23.60 | 22.72
-| [fastapi.0.60.0](https://pypi.org/project/fastapi.0.60.0/) `` | 5702 | 21.82 | 23.46 | 22.46
-| [fastapi.0.60.1](https://pypi.org/project/fastapi.0.60.1/) `` | 7598 | 15.18 | 15.81 | 17.29
-| [fastapi.0.60.2](https://pypi.org/project/fastapi.0.60.2/) `` | 7642 | 15.08 | 15.64 | 17.24
-| [fastapi.0.61.0](https://pypi.org/project/fastapi.0.61.0/) `` | 7591 | 15.25 | 15.79 | 17.26
-| [fastapi.0.61.1](https://pypi.org/project/fastapi.0.61.1/) `` | 7646 | 15.07 | 15.74 | 17.21
-| [fastapi.0.61.2](https://pypi.org/project/fastapi.0.61.2/) `` | 7673 | 15.03 | 15.62 | 17.16
-| [fastapi.0.62.0](https://pypi.org/project/fastapi.0.62.0/) `` | 7753 | 14.95 | 15.48 | 16.95
-| [fastapi.0.63.0](https://pypi.org/project/fastapi.0.63.0/) `` | 7682 | 15.07 | 15.61 | 17.06
-| [fastapi.0.64.0](https://pypi.org/project/fastapi.0.64.0/) `` | 7680 | 15.08 | 15.64 | 17.11
-| [fastapi.0.65.0](https://pypi.org/project/fastapi.0.65.0/) `` | 7733 | 15.01 | 15.49 | 16.99
-| [fastapi.0.65.1](https://pypi.org/project/fastapi.0.65.1/) `` | 7746 | 14.98 | 15.49 | 16.95
-| [fastapi.0.65.2](https://pypi.org/project/fastapi.0.65.2/) `` | 7827 | 14.80 | 15.19 | 16.78
-| [fastapi.0.65.3](https://pypi.org/project/fastapi.0.65.3/) `` | 7738 | 14.91 | 15.44 | 16.95
-| [fastapi.0.66.0](https://pypi.org/project/fastapi.0.66.0/) `` | 7685 | 15.03 | 15.55 | 17.08
-| [fastapi.0.66.1](https://pypi.org/project/fastapi.0.66.1/) `` | 7771 | 14.83 | 15.31 | 16.95
-| [fastapi.0.67.0](https://pypi.org/project/fastapi.0.67.0/) `` | 7776 | 14.84 | 15.39 | 16.89
-| [fastapi.0.68.0](https://pypi.org/project/fastapi.0.68.0/) `` | 7729 | 14.87 | 15.53 | 17.01
-| [fastapi.0.68.1](https://pypi.org/project/fastapi.0.68.1/) `` | 7847 | 14.74 | 15.16 | 16.75
-| [fastapi.0.68.2](https://pypi.org/project/fastapi.0.68.2/) `` | 7766 | 14.91 | 15.35 | 16.87
-| [fastapi.0.69.0](https://pypi.org/project/fastapi.0.69.0/) `` | 7820 | 14.81 | 15.24 | 16.84
-| [fastapi.0.70.0](https://pypi.org/project/fastapi.0.70.0/) `` | 7681 | 15.14 | 15.67 | 17.14
-| [fastapi.0.70.1](https://pypi.org/project/fastapi.0.70.1/) `` | 7812 | 14.86 | 15.26 | 16.87
-| [fastapi.0.71.0](https://pypi.org/project/fastapi.0.71.0/) `` | 7787 | 14.90 | 15.46 | 16.88
-| [fastapi.0.72.0](https://pypi.org/project/fastapi.0.72.0/) `` | 7834 | 14.78 | 15.26 | 16.74
-| [fastapi.0.73.0](https://pypi.org/project/fastapi.0.73.0/) `` | 7885 | 14.69 | 15.17 | 16.69
-| [fastapi.0.74.0](https://pypi.org/project/fastapi.0.74.0/) `` | 7905 | 14.60 | 15.09 | 16.61
-| [fastapi.0.74.1](https://pypi.org/project/fastapi.0.74.1/) `` | 7647 | 15.12 | 15.69 | 17.23
-| [fastapi.0.75.0](https://pypi.org/project/fastapi.0.75.0/) `` | 7811 | 14.83 | 15.24 | 16.78
-| [fastapi.0.75.1](https://pypi.org/project/fastapi.0.75.1/) `` | 7702 | 15.08 | 15.59 | 17.08
-| [fastapi.0.75.2](https://pypi.org/project/fastapi.0.75.2/) `` | 7799 | 14.86 | 15.27 | 16.85
-| [fastapi.0.76.0](https://pypi.org/project/fastapi.0.76.0/) `` | 7614 | 15.22 | 15.71 | 17.27
-| [fastapi.0.77.0](https://pypi.org/project/fastapi.0.77.0/) `` | 7723 | 14.97 | 15.55 | 17.03
-| [fastapi.0.77.1](https://pypi.org/project/fastapi.0.77.1/) `` | 7728 | 14.94 | 15.39 | 16.99
-| [fastapi.0.78.0](https://pypi.org/project/fastapi.0.78.0/) `` | 7648 | 15.18 | 15.64 | 17.19
-| [fastapi.0.79.0](https://pypi.org/project/fastapi.0.79.0/) `` | 7645 | 15.00 | 15.66 | 17.26
-| [fastapi.0.79.1](https://pypi.org/project/fastapi.0.79.1/) `` | 7609 | 15.18 | 15.84 | 17.30
-| [fastapi.0.80.0](https://pypi.org/project/fastapi.0.80.0/) `` | 7618 | 15.15 | 15.65 | 17.26
-| [fastapi.0.81.0](https://pypi.org/project/fastapi.0.81.0/) `` | 7661 | 15.05 | 15.67 | 17.20
-| [fastapi.0.82.0](https://pypi.org/project/fastapi.0.82.0/) `` | 7674 | 15.04 | 15.62 | 17.13
-| [fastapi.0.83.0](https://pypi.org/project/fastapi.0.83.0/) `` | 7768 | 14.83 | 15.36 | 16.97
-| [fastapi.0.84.0](https://pypi.org/project/fastapi.0.84.0/) `` | 7762 | 14.89 | 15.32 | 16.96
-| [fastapi.0.85.0](https://pypi.org/project/fastapi.0.85.0/) `` | 7570 | 15.27 | 15.91 | 17.41
-| [fastapi.0.85.1](https://pypi.org/project/fastapi.0.85.1/) `` | 7660 | 15.01 | 15.60 | 17.18
-| [fastapi.0.85.2](https://pypi.org/project/fastapi.0.85.2/) `` | 7622 | 15.15 | 15.76 | 17.24
-| [fastapi.0.86.0](https://pypi.org/project/fastapi.0.86.0/) `` | 7643 | 15.09 | 15.72 | 17.30
-| [fastapi.0.87.0](https://pypi.org/project/fastapi.0.87.0/) `` | 7208 | 16.06 | 16.62 | 18.24
-| [fastapi.0.88.0](https://pypi.org/project/fastapi.0.88.0/) `` | 7162 | 16.16 | 16.72 | 18.35
-| [fastapi.0.89.0](https://pypi.org/project/fastapi.0.89.0/) `` | 7237 | 15.99 | 16.52 | 18.20
-| [fastapi.0.89.1](https://pypi.org/project/fastapi.0.89.1/) `` | 7110 | 16.28 | 16.86 | 18.42
-| [fastapi.0.90.0](https://pypi.org/project/fastapi.0.90.0/) `` | 7230 | 15.85 | 16.44 | 18.19
-| [fastapi.0.90.1](https://pypi.org/project/fastapi.0.90.1/) `` | 7193 | 15.98 | 16.75 | 18.31
-| [fastapi.0.91.0](https://pypi.org/project/fastapi.0.91.0/) `` | 7457 | 15.46 | 16.13 | 17.65
-| [fastapi.0.92.0](https://pypi.org/project/fastapi.0.92.0/) `` | 7658 | 15.10 | 15.69 | 17.12
-| [fastapi.0.93.0](https://pypi.org/project/fastapi.0.93.0/) `` | 7666 | 14.93 | 15.57 | 17.19
-| [fastapi.0.94.0](https://pypi.org/project/fastapi.0.94.0/) `` | 7624 | 15.13 | 15.75 | 17.16
-| [fastapi.0.94.1](https://pypi.org/project/fastapi.0.94.1/) `` | 7616 | 15.18 | 15.83 | 17.26
-| [fastapi.0.95.0](https://pypi.org/project/fastapi.0.95.0/) `` | 7732 | 14.94 | 15.54 | 17.02
-| [fastapi.0.95.1](https://pypi.org/project/fastapi.0.95.1/) `` | 7618 | 15.20 | 15.72 | 17.23
-| [fastapi.0.95.2](https://pypi.org/project/fastapi.0.95.2/) `` | 7770 | 14.81 | 15.34 | 16.93
-| [fastapi.0.96.0](https://pypi.org/project/fastapi.0.96.0/) `` | 7733 | 14.88 | 15.48 | 16.96
-| [fastapi.0.96.1](https://pypi.org/project/fastapi.0.96.1/) `` | 7724 | 14.91 | 15.54 | 17.03
-| [fastapi.0.97.0](https://pypi.org/project/fastapi.0.97.0/) `` | 7814 | 14.79 | 15.29 | 16.78
-| [fastapi.0.98.0](https://pypi.org/project/fastapi.0.98.0/) `` | 7655 | 15.09 | 15.71 | 17.18
-| [fastapi.0.99.0](https://pypi.org/project/fastapi.0.99.0/) `` | 7783 | 14.79 | 15.38 | 16.86
-| [fastapi.0.99.1](https://pypi.org/project/fastapi.0.99.1/) `` | 7797 | 14.78 | 15.50 | 16.87
+It is strongly recommended to validate and build all framework versions before running the full benchmark. This ensures that only images known to work correctly are benchmarked, and that subsequent runs benefit from the build cache.
 
+**Step 1 — Validate and build all versions:**
 
-</details>
+```sh
+./run.py --validate-only
+```
 
-<h3 id="composite"> Composite stats </h3>
-<details open>
-<summary> Combined benchmarks results</summary>
+This builds Docker images for all framework versions and runs a quick functional test on each. Validated versions are saved to `good_versions.json`.
 
-Sorted by completed requests
+**Step 2 — Run the full benchmark on validated versions:**
 
-| Framework | Requests completed | Avg Latency 50% (ms) | Avg Latency 75% (ms) | Avg Latency (ms) |
-| --------- | -----------------: | -------------------: | -------------------: | ---------------: |
-| [fastapi.0.100.0](https://pypi.org/project/fastapi.0.100.0/) `` | 947430 | 8.29 | 8.64 | 9.74
-| [fastapi.0.100.1](https://pypi.org/project/fastapi.0.100.1/) `` | 927165 | 8.35 | 8.78 | 9.99
-| [fastapi.0.101.0](https://pypi.org/project/fastapi.0.101.0/) `` | 942660 | 8.29 | 8.79 | 9.69
-| [fastapi.0.101.1](https://pypi.org/project/fastapi.0.101.1/) `` | 936615 | 8.3 | 8.72 | 10.12
-| [fastapi.0.102.0](https://pypi.org/project/fastapi.0.102.0/) `` | 946620 | 8.31 | 8.7 | 9.57
-| [fastapi.0.103.0](https://pypi.org/project/fastapi.0.103.0/) `` | 949530 | 8.26 | 8.66 | 9.45
-| [fastapi.0.103.1](https://pypi.org/project/fastapi.0.103.1/) `` | 942435 | 8.25 | 8.66 | 9.78
-| [fastapi.0.103.2](https://pypi.org/project/fastapi.0.103.2/) `` | 939735 | 8.29 | 8.7 | 9.56
-| [fastapi.0.104.0](https://pypi.org/project/fastapi.0.104.0/) `` | 954210 | 8.27 | 8.66 | 9.5
-| [fastapi.0.104.1](https://pypi.org/project/fastapi.0.104.1/) `` | 948525 | 8.24 | 8.6 | 9.45
-| [fastapi.0.105.0](https://pypi.org/project/fastapi.0.105.0/) `` | 941790 | 8.24 | 8.61 | 10.04
-| [fastapi.0.106.0](https://pypi.org/project/fastapi.0.106.0/) `` | 941025 | 8.31 | 8.77 | 9.96
-| [fastapi.0.107.0](https://pypi.org/project/fastapi.0.107.0/) `` | 901260 | 8.54 | 8.9 | 10.35
-| [fastapi.0.108.0](https://pypi.org/project/fastapi.0.108.0/) `` | 877110 | 8.54 | 9.05 | 15.18
-| [fastapi.0.109.0](https://pypi.org/project/fastapi.0.109.0/) `` | 756945 | 9.24 | 9.68 | 23.43
-| [fastapi.0.109.1](https://pypi.org/project/fastapi.0.109.1/) `` | 774525 | 9.3 | 9.75 | 11.12
-| [fastapi.0.109.2](https://pypi.org/project/fastapi.0.109.2/) `` | 770835 | 9.21 | 9.69 | 10.94
-| [fastapi.0.110.0](https://pypi.org/project/fastapi.0.110.0/) `` | 768870 | 9.25 | 9.67 | 11.01
-| [fastapi.0.110.1](https://pypi.org/project/fastapi.0.110.1/) `` | 763905 | 9.32 | 9.8 | 11.27
-| [fastapi.0.110.2](https://pypi.org/project/fastapi.0.110.2/) `` | 766260 | 9.26 | 9.76 | 11.0
-| [fastapi.0.110.3](https://pypi.org/project/fastapi.0.110.3/) `` | 754215 | 9.28 | 9.8 | 22.29
-| [fastapi.0.110.3.dev1](https://pypi.org/project/fastapi.0.110.3.dev1/) `` | 773130 | 9.23 | 9.63 | 11.0
-| [fastapi.0.110.3.dev2](https://pypi.org/project/fastapi.0.110.3.dev2/) `` | 764655 | 9.36 | 9.76 | 11.35
-| [fastapi.0.111.0](https://pypi.org/project/fastapi.0.111.0/) `` | 764265 | 9.32 | 9.75 | 11.05
-| [fastapi.0.111.0.dev1](https://pypi.org/project/fastapi.0.111.0.dev1/) `` | 762435 | 9.33 | 9.81 | 11.41
-| [fastapi.0.111.1](https://pypi.org/project/fastapi.0.111.1/) `` | 762105 | 9.27 | 9.63 | 11.13
-| [fastapi.0.112.0](https://pypi.org/project/fastapi.0.112.0/) `` | 747570 | 9.28 | 9.78 | 23.05
-| [fastapi.0.112.1](https://pypi.org/project/fastapi.0.112.1/) `` | 766515 | 9.28 | 9.65 | 10.93
-| [fastapi.0.112.2](https://pypi.org/project/fastapi.0.112.2/) `` | 763755 | 9.25 | 9.71 | 11.17
-| [fastapi.0.112.3](https://pypi.org/project/fastapi.0.112.3/) `` | 760725 | 9.25 | 9.82 | 11.0
-| [fastapi.0.112.4](https://pypi.org/project/fastapi.0.112.4/) `` | 751215 | 9.4 | 9.83 | 11.36
-| [fastapi.0.113.0](https://pypi.org/project/fastapi.0.113.0/) `` | 744315 | 9.45 | 9.83 | 10.97
-| [fastapi.0.114.0](https://pypi.org/project/fastapi.0.114.0/) `` | 750510 | 9.41 | 9.8 | 11.27
-| [fastapi.0.114.1](https://pypi.org/project/fastapi.0.114.1/) `` | 757920 | 9.28 | 9.72 | 11.18
-| [fastapi.0.114.2](https://pypi.org/project/fastapi.0.114.2/) `` | 750315 | 9.37 | 9.85 | 11.34
-| [fastapi.0.115.0](https://pypi.org/project/fastapi.0.115.0/) `` | 731400 | 9.59 | 9.97 | 11.37
-| [fastapi.0.115.1](https://pypi.org/project/fastapi.0.115.1/) `` | 726195 | 9.61 | 10.1 | 11.21
-| [fastapi.0.115.10](https://pypi.org/project/fastapi.0.115.10/) `` | 834345 | 8.78 | 9.19 | 10.66
-| [fastapi.0.115.11](https://pypi.org/project/fastapi.0.115.11/) `` | 842295 | 8.81 | 9.21 | 10.11
-| [fastapi.0.115.12](https://pypi.org/project/fastapi.0.115.12/) `` | 846975 | 8.72 | 9.07 | 10.44
-| [fastapi.0.115.13](https://pypi.org/project/fastapi.0.115.13/) `` | 849390 | 8.63 | 9.08 | 10.29
-| [fastapi.0.115.14](https://pypi.org/project/fastapi.0.115.14/) `` | 853740 | 8.72 | 9.04 | 10.23
-| [fastapi.0.115.2](https://pypi.org/project/fastapi.0.115.2/) `` | 838515 | 8.73 | 9.21 | 10.45
-| [fastapi.0.115.3](https://pypi.org/project/fastapi.0.115.3/) `` | 835815 | 8.73 | 9.24 | 10.45
-| [fastapi.0.115.4](https://pypi.org/project/fastapi.0.115.4/) `` | 851940 | 8.69 | 9.08 | 9.98
-| [fastapi.0.115.5](https://pypi.org/project/fastapi.0.115.5/) `` | 841515 | 8.82 | 9.2 | 10.39
-| [fastapi.0.115.6](https://pypi.org/project/fastapi.0.115.6/) `` | 846090 | 8.7 | 9.17 | 10.54
-| [fastapi.0.115.7](https://pypi.org/project/fastapi.0.115.7/) `` | 847650 | 8.77 | 9.12 | 10.02
-| [fastapi.0.115.8](https://pypi.org/project/fastapi.0.115.8/) `` | 852225 | 8.67 | 8.98 | 10.28
-| [fastapi.0.115.9](https://pypi.org/project/fastapi.0.115.9/) `` | 833550 | 8.82 | 9.17 | 10.35
-| [fastapi.0.116.0](https://pypi.org/project/fastapi.0.116.0/) `` | 847350 | 8.71 | 9.09 | 10.01
-| [fastapi.0.116.1](https://pypi.org/project/fastapi.0.116.1/) `` | 843150 | 8.77 | 9.14 | 10.07
-| [fastapi.0.116.2](https://pypi.org/project/fastapi.0.116.2/) `` | 837990 | 8.77 | 9.11 | 10.04
-| [fastapi.0.117.0](https://pypi.org/project/fastapi.0.117.0/) `` | 849900 | 8.75 | 9.16 | 10.21
-| [fastapi.0.117.1](https://pypi.org/project/fastapi.0.117.1/) `` | 844620 | 8.67 | 9.07 | 10.06
-| [fastapi.0.51.0](https://pypi.org/project/fastapi.0.51.0/) `` | 1011570 | 9.99 | 10.71 | 10.65
-| [fastapi.0.52.0](https://pypi.org/project/fastapi.0.52.0/) `` | 1011150 | 9.95 | 10.66 | 10.53
-| [fastapi.0.53.0](https://pypi.org/project/fastapi.0.53.0/) `` | 1022565 | 9.82 | 10.55 | 10.41
-| [fastapi.0.53.1](https://pypi.org/project/fastapi.0.53.1/) `` | 992940 | 10.05 | 10.71 | 10.62
-| [fastapi.0.53.2](https://pypi.org/project/fastapi.0.53.2/) `` | 1000905 | 10.02 | 10.74 | 10.61
-| [fastapi.0.54.0](https://pypi.org/project/fastapi.0.54.0/) `` | 1009890 | 9.88 | 10.65 | 10.46
-| [fastapi.0.54.1](https://pypi.org/project/fastapi.0.54.1/) `` | 1017255 | 9.82 | 10.51 | 10.66
-| [fastapi.0.54.2](https://pypi.org/project/fastapi.0.54.2/) `` | 1010130 | 9.87 | 10.63 | 10.45
-| [fastapi.0.55.0](https://pypi.org/project/fastapi.0.55.0/) `` | 1014015 | 9.94 | 10.67 | 10.5
-| [fastapi.0.55.1](https://pypi.org/project/fastapi.0.55.1/) `` | 1017315 | 9.8 | 10.5 | 10.39
-| [fastapi.0.56.0](https://pypi.org/project/fastapi.0.56.0/) `` | 1012245 | 9.94 | 10.67 | 10.52
-| [fastapi.0.56.1](https://pypi.org/project/fastapi.0.56.1/) `` | 1014165 | 9.86 | 10.6 | 10.61
-| [fastapi.0.57.0](https://pypi.org/project/fastapi.0.57.0/) `` | 1008360 | 9.91 | 10.69 | 11.02
-| [fastapi.0.58.0](https://pypi.org/project/fastapi.0.58.0/) `` | 1010595 | 9.9 | 10.62 | 10.51
-| [fastapi.0.58.1](https://pypi.org/project/fastapi.0.58.1/) `` | 1018200 | 9.82 | 10.5 | 10.41
-| [fastapi.0.59.0](https://pypi.org/project/fastapi.0.59.0/) `` | 1018365 | 9.9 | 10.62 | 10.49
-| [fastapi.0.60.0](https://pypi.org/project/fastapi.0.60.0/) `` | 1016865 | 9.84 | 10.57 | 10.42
-| [fastapi.0.60.1](https://pypi.org/project/fastapi.0.60.1/) `` | 1025715 | 7.7 | 8.07 | 8.79
-| [fastapi.0.60.2](https://pypi.org/project/fastapi.0.60.2/) `` | 1041465 | 7.6 | 7.97 | 9.64
-| [fastapi.0.61.0](https://pypi.org/project/fastapi.0.61.0/) `` | 1041690 | 7.67 | 8.01 | 8.7
-| [fastapi.0.61.1](https://pypi.org/project/fastapi.0.61.1/) `` | 1036245 | 7.61 | 7.99 | 9.19
-| [fastapi.0.61.2](https://pypi.org/project/fastapi.0.61.2/) `` | 1050780 | 7.59 | 7.91 | 8.62
-| [fastapi.0.62.0](https://pypi.org/project/fastapi.0.62.0/) `` | 1063335 | 7.53 | 7.83 | 8.71
-| [fastapi.0.63.0](https://pypi.org/project/fastapi.0.63.0/) `` | 1063635 | 7.56 | 7.87 | 8.55
-| [fastapi.0.64.0](https://pypi.org/project/fastapi.0.64.0/) `` | 1041030 | 7.63 | 7.95 | 8.62
-| [fastapi.0.65.0](https://pypi.org/project/fastapi.0.65.0/) `` | 1066905 | 7.54 | 7.83 | 8.52
-| [fastapi.0.65.1](https://pypi.org/project/fastapi.0.65.1/) `` | 1049145 | 7.59 | 7.85 | 9.17
-| [fastapi.0.65.2](https://pypi.org/project/fastapi.0.65.2/) `` | 1059765 | 7.49 | 7.73 | 8.47
-| [fastapi.0.65.3](https://pypi.org/project/fastapi.0.65.3/) `` | 1058250 | 7.53 | 7.83 | 8.53
-| [fastapi.0.66.0](https://pypi.org/project/fastapi.0.66.0/) `` | 1053345 | 7.61 | 7.87 | 8.6
-| [fastapi.0.66.1](https://pypi.org/project/fastapi.0.66.1/) `` | 1050765 | 7.53 | 7.79 | 8.55
-| [fastapi.0.67.0](https://pypi.org/project/fastapi.0.67.0/) `` | 1055475 | 7.53 | 7.83 | 8.52
-| [fastapi.0.68.0](https://pypi.org/project/fastapi.0.68.0/) `` | 1047795 | 7.55 | 7.9 | 8.58
-| [fastapi.0.68.1](https://pypi.org/project/fastapi.0.68.1/) `` | 1065855 | 7.47 | 7.7 | 8.46
-| [fastapi.0.68.2](https://pypi.org/project/fastapi.0.68.2/) `` | 1058235 | 7.55 | 7.77 | 8.53
-| [fastapi.0.69.0](https://pypi.org/project/fastapi.0.69.0/) `` | 1062195 | 7.48 | 7.75 | 8.5
-| [fastapi.0.70.0](https://pypi.org/project/fastapi.0.70.0/) `` | 1037250 | 7.69 | 7.97 | 8.66
-| [fastapi.0.70.1](https://pypi.org/project/fastapi.0.70.1/) `` | 1066485 | 7.5 | 7.74 | 8.48
-| [fastapi.0.71.0](https://pypi.org/project/fastapi.0.71.0/) `` | 1045500 | 7.56 | 7.88 | 8.56
-| [fastapi.0.72.0](https://pypi.org/project/fastapi.0.72.0/) `` | 1048680 | 7.52 | 7.81 | 8.49
-| [fastapi.0.73.0](https://pypi.org/project/fastapi.0.73.0/) `` | 1050030 | 7.47 | 7.74 | 8.97
-| [fastapi.0.74.0](https://pypi.org/project/fastapi.0.74.0/) `` | 1067700 | 7.41 | 7.66 | 8.4
-| [fastapi.0.74.1](https://pypi.org/project/fastapi.0.74.1/) `` | 1005990 | 7.75 | 8.07 | 8.78
-| [fastapi.0.75.0](https://pypi.org/project/fastapi.0.75.0/) `` | 1023465 | 7.6 | 7.84 | 8.59
-| [fastapi.0.75.1](https://pypi.org/project/fastapi.0.75.1/) `` | 1023405 | 7.69 | 7.98 | 8.68
-| [fastapi.0.75.2](https://pypi.org/project/fastapi.0.75.2/) `` | 1038195 | 7.57 | 7.79 | 8.57
-| [fastapi.0.76.0](https://pypi.org/project/fastapi.0.76.0/) `` | 975120 | 7.89 | 8.16 | 8.91
-| [fastapi.0.77.0](https://pypi.org/project/fastapi.0.77.0/) `` | 998160 | 7.73 | 8.0 | 8.73
-| [fastapi.0.77.1](https://pypi.org/project/fastapi.0.77.1/) `` | 992430 | 7.73 | 7.97 | 8.74
-| [fastapi.0.78.0](https://pypi.org/project/fastapi.0.78.0/) `` | 972600 | 7.85 | 8.14 | 8.87
-| [fastapi.0.79.0](https://pypi.org/project/fastapi.0.79.0/) `` | 972645 | 7.77 | 8.22 | 8.9
-| [fastapi.0.79.1](https://pypi.org/project/fastapi.0.79.1/) `` | 969420 | 7.85 | 8.28 | 8.94
-| [fastapi.0.80.0](https://pypi.org/project/fastapi.0.80.0/) `` | 975675 | 7.82 | 8.12 | 8.87
-| [fastapi.0.81.0](https://pypi.org/project/fastapi.0.81.0/) `` | 978195 | 7.78 | 8.18 | 8.86
-| [fastapi.0.82.0](https://pypi.org/project/fastapi.0.82.0/) `` | 971430 | 7.79 | 8.19 | 8.86
-| [fastapi.0.83.0](https://pypi.org/project/fastapi.0.83.0/) `` | 978045 | 7.7 | 8.12 | 8.78
-| [fastapi.0.84.0](https://pypi.org/project/fastapi.0.84.0/) `` | 976740 | 7.73 | 8.07 | 8.81
-| [fastapi.0.85.0](https://pypi.org/project/fastapi.0.85.0/) `` | 980100 | 7.85 | 8.25 | 8.93
-| [fastapi.0.85.1](https://pypi.org/project/fastapi.0.85.1/) `` | 964935 | 7.84 | 8.17 | 9.57
-| [fastapi.0.85.2](https://pypi.org/project/fastapi.0.85.2/) `` | 964695 | 7.87 | 8.27 | 8.94
-| [fastapi.0.86.0](https://pypi.org/project/fastapi.0.86.0/) `` | 963045 | 7.82 | 8.22 | 9.84
-| [fastapi.0.87.0](https://pypi.org/project/fastapi.0.87.0/) `` | 964095 | 8.15 | 8.52 | 9.23
-| [fastapi.0.88.0](https://pypi.org/project/fastapi.0.88.0/) `` | 964080 | 8.17 | 8.53 | 9.29
-| [fastapi.0.89.0](https://pypi.org/project/fastapi.0.89.0/) `` | 981825 | 8.06 | 8.41 | 9.18
-| [fastapi.0.89.1](https://pypi.org/project/fastapi.0.89.1/) `` | 959625 | 8.22 | 8.6 | 9.3
-| [fastapi.0.90.0](https://pypi.org/project/fastapi.0.90.0/) `` | 966435 | 8.07 | 8.42 | 9.21
-| [fastapi.0.90.1](https://pypi.org/project/fastapi.0.90.1/) `` | 965385 | 8.12 | 8.53 | 9.25
-| [fastapi.0.91.0](https://pypi.org/project/fastapi.0.91.0/) `` | 975285 | 7.91 | 8.32 | 9.01
-| [fastapi.0.92.0](https://pypi.org/project/fastapi.0.92.0/) `` | 976470 | 7.8 | 8.17 | 8.83
-| [fastapi.0.93.0](https://pypi.org/project/fastapi.0.93.0/) `` | 961380 | 7.81 | 8.18 | 8.92
-| [fastapi.0.94.0](https://pypi.org/project/fastapi.0.94.0/) `` | 966510 | 7.84 | 8.25 | 8.92
-| [fastapi.0.94.1](https://pypi.org/project/fastapi.0.94.1/) `` | 965070 | 7.86 | 8.26 | 8.93
-| [fastapi.0.95.0](https://pypi.org/project/fastapi.0.95.0/) `` | 976485 | 7.74 | 8.13 | 8.81
-| [fastapi.0.95.1](https://pypi.org/project/fastapi.0.95.1/) `` | 967260 | 7.86 | 8.22 | 8.92
-| [fastapi.0.95.2](https://pypi.org/project/fastapi.0.95.2/) `` | 976860 | 7.7 | 8.07 | 8.78
-| [fastapi.0.96.0](https://pypi.org/project/fastapi.0.96.0/) `` | 960930 | 7.8 | 8.14 | 8.85
-| [fastapi.0.96.1](https://pypi.org/project/fastapi.0.96.1/) `` | 973845 | 7.74 | 8.17 | 9.58
-| [fastapi.0.97.0](https://pypi.org/project/fastapi.0.97.0/) `` | 979965 | 7.67 | 8.05 | 8.73
-| [fastapi.0.98.0](https://pypi.org/project/fastapi.0.98.0/) `` | 964545 | 7.83 | 8.26 | 8.91
-| [fastapi.0.99.0](https://pypi.org/project/fastapi.0.99.0/) `` | 978105 | 7.69 | 8.11 | 8.76
-| [fastapi.0.99.1](https://pypi.org/project/fastapi.0.99.1/) `` | 961575 | 7.69 | 8.18 | 9.94
+```sh
+./run.py --use-good-versions --rounds N
+```
 
-</details>
+This runs the benchmark for `N` rounds using only the versions that passed validation, pulling from the cache built in the previous step.
 
-## Conclusion
+---
 
-Nothing here, just some measures for you.
+### All Execution Modes
+
+| Command | Description |
+|---|---|
+| `./run.py` | Full benchmark across all versions |
+| `./run.py --validate-only` | Build images and run quick validation only |
+| `./run.py --use-good-versions` | Benchmark only validated versions |
+| `./run.py --use-good-versions --rounds N` | Benchmark validated versions for N rounds |
+| `./run.py --force-rebuild` | Force rebuild of all images, even if cached |
+
+### Flags
+
+| Flag | Description |
+|---|---|
+| `--validate-only`, `--build-only` | Build images and validate with a quick test |
+| `--use-good-versions` | Use versions from `good_versions.json` |
+| `--force-rebuild` | Rebuild all images regardless of cache |
+| `--rounds N` | Number of benchmark rounds to execute |
+| `--help`, `-h` | Show help message |
+
+---
 
 ## License
 
-Licensed under a MIT license (See LICENSE file)
+Licensed under the MIT License (see the LICENSE file).

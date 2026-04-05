@@ -2,7 +2,7 @@
 set -euo pipefail
 
 FRAMEWORK=$1
-VERSION="${2:-}"  # opcional
+VERSION="${2:-}"  # optional
 NAME="$FRAMEWORK${VERSION:+-$VERSION}"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -23,31 +23,31 @@ fi
 APP_DIR="$ROOT_DIR/frameworks/$FRAMEWORK"
 SCRIPTS_DIR="$ROOT_DIR/wrk"
 
-echo "Usando Docker image: $APP_IMAGE"
+echo "Using Docker image: $APP_IMAGE"
 echo $SCRIPTS_DIR
 
 mkdir -p $RESULTS_DIR
 mkdir -p $RESULTS_DIR_LOGS
 mkdir -p $RESULTS_DIR_CARBON
 
-# Remove container antigo, se existir
+# Remove old container, if it exists
 docker rm -f $APP_NAME
 
-# Verifica se a imagem já existe
+# Check if the image already exists
 if docker image inspect $APP_IMAGE &> /dev/null; then
-  echo "Imagem $APP_IMAGE já existe, pulando build..."
+  echo "Image $APP_IMAGE already exists, skipping build..."
 else
-  echo "Construindo imagem $APP_IMAGE..."
-  # Build da imagem com TAG versionada
+  echo "Building image $APP_IMAGE..."
+  # Build the image with versioned TAG
   docker build \
     -f "$ROOT_DIR/frameworks/Dockerfile" \
     -t $APP_IMAGE $APP_DIR
-  echo "Build concluído!"
+  echo "Build complete!"
 fi
 
-# Sobe o container da aplicação
+# Start the application container
 
-echo ">>> Iniciando container $APP_NAME..."
+echo ">>> Starting container $APP_NAME..."
 
 echo "docker run -d \
   -p 8080:8080 \
@@ -58,12 +58,12 @@ echo "docker run -d \
 
 docker run -d -p 8080:8080 --name $APP_NAME -v $RESULTS_DIR_CARBON:/results --env-file .env $APP_IMAGE
 
-echo "Rodando"
+echo "Running"
 
-# Aguarda a aplicação estar pronta
+# Wait for the application to be ready
 sleep 2
 
-# Função de benchmark
+# Benchmark function
 run_benchmark() {
   local endpoint="$1"
   local label="$2"
@@ -87,23 +87,23 @@ run_benchmark() {
 # ------------------------------------------------------------------------------
 # run_benchmark_hey
 #
-# Uso:
+# Usage:
 #   run_benchmark_hey <endpoint> <label> [max_requests] [duration] \
 #                     [method] [content_type] [body] [body_file] [extra_headers...]
 #
-# Parâmetros:
-#   endpoint      - caminho da URL (ex.: "html", "api/users/1/records/1?query=test")
-#   label         - nome do teste, usado no nome do arquivo de saída
-#   max_requests  - número total de requisições (use "" para ignorar)
-#   duration      - duração (ex.: "30s", "2m") (use "" para ignorar)
-#   method        - método HTTP: GET, POST, PUT, DELETE etc. (padrão: GET)
-#   content_type  - valor do Content-Type (use "" para não definir)
-#   body          - corpo inline como string (use "" para não definir)
-#   body_file     - caminho do arquivo de corpo no HOST (montado em /body no container)
-#                   (use "" para não definir; tem prioridade sobre body inline)
-#   extra_headers - qualquer argumento adicional "-H 'Header: value'" (opcional, múltiplos)
+# Parameters:
+#   endpoint      - URL path (e.g.: "html", "api/users/1/records/1?query=test")
+#   label         - test name, used in the output file name
+#   max_requests  - total number of requests (use "" to ignore)
+#   duration      - duration (e.g.: "30s", "2m") (use "" to ignore)
+#   method        - HTTP method: GET, POST, PUT, DELETE etc. (default: GET)
+#   content_type  - Content-Type value (use "" to leave unset)
+#   body          - inline body as string (use "" to leave unset)
+#   body_file     - path to body file on HOST (mounted at /body in the container)
+#                   (use "" to leave unset; takes priority over inline body)
+#   extra_headers - any additional "-H 'Header: value'" arguments (optional, multiple)
 #
-# Exemplos:
+# Examples:
 #   run_benchmark_hey "html" "html" 10000 "" "GET"
 #   run_benchmark_hey "api/..." "api" 10000 "" "PUT" "application/json" '{"foo":"bar"}' "" \
 #                     "-H" "authorization: user"
@@ -119,7 +119,7 @@ run_benchmark_hey() {
   local content_type="${6:-}"
   local body="${7:-}"
   local body_file="${8:-}"
-  # Todos os argumentos extras a partir do 9º são tratados como flags adicionais do hey
+  # All extra arguments from the 9th onward are treated as additional hey flags
   local extra_args=("${@:9}")
 
   local hey_base=("docker" "run" "--rm"
@@ -127,7 +127,7 @@ run_benchmark_hey() {
     "-v" "$RESULTS_DIR_LOGS:/results"
   )
 
-  # Se houver body_file, monta o diretório pai dentro do container
+  # If a body_file is provided, mount its parent directory inside the container
   if [[ -n "$body_file" ]]; then
     local body_file_dir
     body_file_dir="$(dirname "$body_file")"
@@ -143,7 +143,7 @@ run_benchmark_hey() {
     "-m" "$method"
   )
 
-  # Limite: número de requisições ou duração
+  # Limit: number of requests or duration
   local tipo=""
   if [[ -n "$max_requests" ]]; then
     hey_base+=("-n" "$max_requests")
@@ -152,26 +152,26 @@ run_benchmark_hey() {
     hey_base+=("-z" "$duration")
     tipo="duration"
   else
-    echo "Erro: informe max_requests ou duration" >&2
+    echo "Error: provide max_requests or duration" >&2
     return 1
   fi
 
-  # Content-Type via -T (parâmetro dedicado do hey)
+  # Content-Type via -T (hey's dedicated parameter)
   if [[ -n "$content_type" ]]; then
     hey_base+=("-T" "$content_type")
   fi
 
-  # Body inline via -d
+  # Inline body via -d
   if [[ -n "$body" && -z "$body_file" ]]; then
     hey_base+=("-d" "$body")
   fi
 
-  # Body via arquivo via -D (aponta para o path dentro do container)
+  # File body via -D (points to the path inside the container)
   if [[ -n "$body_file" ]]; then
     hey_base+=("-D" "/bodydir/${body_file_name}")
   fi
 
-  # Headers extras (ex.: "-H" "authorization: user")
+  # Extra headers (e.g.: "-H" "authorization: user")
   if [[ ${#extra_args[@]} -gt 0 ]]; then
     hey_base+=("${extra_args[@]}")
   fi
@@ -180,10 +180,10 @@ run_benchmark_hey() {
 
   local outfile="$RESULTS_DIR_LOGS/${label}_${tipo}.csv"
 
-  echo ">>> Executando hey: ${hey_base[*]}"
+  echo ">>> Running hey: ${hey_base[*]}"
   "${hey_base[@]}" > "$outfile"
 
-  echo "Benchmark '$label' concluído. Resultado em $outfile"
+  echo "Benchmark '$label' complete. Results saved to $outfile"
 
   sleep 1
 }
@@ -200,8 +200,8 @@ finish_benchmark() {
 # run_benchmark "api/users/1/records/1?query=test" "api"
 
 # ------------------------------------------------------------------------------
-# Prepara o body multipart para o endpoint "upload"
-# Espelha exatamente o que o upload.lua faz manualmente
+# Prepare the multipart body for the "upload" endpoint
+# Mirrors exactly what upload.lua does manually
 # ------------------------------------------------------------------------------
 MULTIPART_BOUNDARY="----WebKitFormBoundaryePkpFF7tjBAqx29L"
 MULTIPART_BODY_FILE="/tmp/hey_upload_body_${FRAMEWORK}.txt"
@@ -211,19 +211,19 @@ printf -- "--%s\r\nContent-Disposition: form-data; name=\"file\"; filename=\"tes
 cat "$SCRIPTS_DIR/1kb.txt" >> "$MULTIPART_BODY_FILE"
 printf "\r\n--%s--" "$MULTIPART_BOUNDARY" >> "$MULTIPART_BODY_FILE"
 
-# html -> GET simples
+# html -> simple GET
 run_benchmark_hey \
   "html" "html" \
   10000 "" \
   "GET" "" "" ""
 
-# upload → POST multipart (espelha upload.lua)
+# upload -> multipart POST (mirrors upload.lua)
 run_benchmark_hey \
   "upload" "upload" \
   10000 "" \
   "POST" "multipart/form-data; boundary=${MULTIPART_BOUNDARY}" "" "$MULTIPART_BODY_FILE"
 
-# api -> PUT com JSON e header de autorização (espelha api.lua)
+# api -> PUT with JSON and authorization header (mirrors api.lua)
 run_benchmark_hey \
   "api/users/1/records/1?query=test" "api" \
   10000 "" \
@@ -233,8 +233,8 @@ run_benchmark_hey \
 
 finish_benchmark
 
-# Limpa arquivo temporário de multipart
+# Clean up temporary multipart file
 rm -f "$MULTIPART_BODY_FILE"
 
-echo "=== Benchmark concluído. Resultados salvos em $RESULTS_DIR_LOGS ==="
+echo "=== Benchmark complete. Results saved to $RESULTS_DIR_LOGS ==="
 sleep 1

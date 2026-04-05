@@ -8,3 +8,8 @@
 *__pycache__*
 results_*
 .env
+/bin
+/lib
+/py-bench
+/start
+/lib64
