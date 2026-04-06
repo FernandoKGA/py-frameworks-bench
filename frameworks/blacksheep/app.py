@@ -4,6 +4,7 @@ from uuid import uuid4
 from blacksheep import Application
 from blacksheep.server.responses import html, json, bad_request, text, unauthorized
 from codecarbon import OfflineEmissionsTracker
+from codecarbon.output import FileOutput, EmissionsData
 from importlib.metadata import version, PackageNotFoundError
 
 def save_versions_txt(lib, filepath="/results/version.txt"):
@@ -15,10 +16,14 @@ def save_versions_txt(lib, filepath="/results/version.txt"):
 
 save_versions_txt("blacksheep")
 
+class CustomOutput(FileOutput):
+    def live_out(self, total: EmissionsData, delta: EmissionsData):
+        self.out(total, delta)
+
 tracker = OfflineEmissionsTracker(
     output_dir="/results",  # ou outro caminho acessível
-    country_iso_code="BRA",  # opcional: Brasil
-    log_level="info"
+    log_level="info",
+    output_handlers=[CustomOutput(output_file_name="emissions.csv",output_dir="/results")],
 )
 tracker.start()
 

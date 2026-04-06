@@ -6,3 +6,10 @@
 /docs/*.lock
 /docs/_site
 *__pycache__*
+results_*
+.env
+/bin
+/lib
+/py-bench
+/start
+/lib64

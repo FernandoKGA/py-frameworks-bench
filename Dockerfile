@@ -1,8 +1,8 @@
-FROM vinixnan/python:3.12 AS base
+FROM python:3.12.3-slim-bookworm AS benchbase
+
+RUN apt-get update -q && apt install -q curl pkg-config patchelf rename linux-perf python3-dev build-essential -y
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
-
-RUN apt update && apt install -y python3-dev build-essential
 
 RUN /usr/local/bin/pip install --no-cache-dir \
     wheel \
@@ -11,7 +11,7 @@ RUN /usr/local/bin/pip install --no-cache-dir \
     ujson \
     uvicorn[standard]
 
-RUN pip install codecarbon pyinstrument setuptools wheel jinja2
+RUN pip install --no-cache-dir codecarbon==3.0.7 pyinstrument setuptools wheel
 
 ONBUILD COPY requirements.txt /app/requirements.txt
 ONBUILD RUN /usr/local/bin/pip install --no-cache-dir -r requirements.txt
