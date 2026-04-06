@@ -14,6 +14,7 @@ The goal of the benchmark is not to evaluate deployment strategies (e.g., uvicor
 - [Frameworks Under Test](#frameworks-under-test)
 - [Test Types](#test-types)
 - [Infrastructure and Automation](#infrastructure-and-automation)
+- [Environment Setup](#environment-setup)
 - [How to Run](#how-to-run)
 
 ---
@@ -81,6 +82,12 @@ Each framework version runs inside an isolated Docker container, ensuring reprod
 docker build . -t benchbase:latest
 ```
 
+To clean up images after an error (replace `fastapi_app` with the target app name):
+
+```sh
+docker images --format '{{.Repository}}:{{.Tag}} {{.ID}}' | grep '^fastapi_app' | awk '{print $2}' | xargs -r docker rmi
+```
+
 ### Automated Pipeline
 
 The project includes an automated pipeline that:
@@ -91,6 +98,35 @@ The project includes an automated pipeline that:
 - **Caches** previously built and validated images to avoid redundant rebuilds across runs
 - **Executes** the benchmark for a configurable number of rounds per version
 - **Collects** both HTTP performance metrics and energy consumption data (via [CodeCarbon](https://docs.codecarbon.io/latest/))
+
+---
+
+## Environment Setup
+
+### Prerequisites
+
+- **Python 3.12**
+- **Docker** (latest stable version) — used to containerize both the framework applications and the `hey` load generator
+
+### Python Virtual Environment
+
+A virtual environment is required to install the Python dependencies used by the pipeline scripts (`run.py` and related tooling). These are intentionally kept minimal and separate from the benchmarked frameworks themselves.
+
+```sh
+# Create the virtual environment
+python3.12 -m venv .venv
+
+# Activate it
+source .venv/bin/activate        # Linux / macOS
+.venv\Scripts\activate           # Windows
+
+# Install the required dependencies
+pip install packaging requests
+```
+
+> The pipeline uses `packaging` for semver-aware version sorting and filtering, and `requests` for querying the PyPI API to discover available framework versions.
+
+Make sure the virtual environment is activated whenever running `run.py`.
 
 ---
 
